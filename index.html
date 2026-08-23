@@ -14,13 +14,12 @@
             --bg: #212121;
             --sidebar: #171717;
             --sidebar-hover: #2a2a2a;
-            --panel: #212121;
             --input: #2f2f2f;
             --border: #3a3a3a;
             --text: #ececec;
-            --muted: #a0a0a0;
-            --code: #171717;
+            --muted: #9b9b9b;
             --accent: #10a37f;
+            --code: #171717;
         }
 
         html,
@@ -52,9 +51,9 @@
         /* APP */
 
         .app {
-            display: flex;
             width: 100%;
             height: 100%;
+            display: flex;
         }
 
         /* SIDEBAR */
@@ -62,12 +61,12 @@
         .sidebar {
             width: 260px;
             height: 100%;
+            background: var(--sidebar);
             display: flex;
             flex-direction: column;
-            background: var(--sidebar);
             padding: 8px;
-            transition: width 0.2s ease;
             flex-shrink: 0;
+            transition: width .2s ease;
         }
 
         .sidebar.hidden {
@@ -82,20 +81,18 @@
             align-items: center;
             gap: 10px;
             padding: 0 10px;
-            margin-bottom: 4px;
         }
 
-        .brand-icon {
-            width: 30px;
-            height: 30px;
+        .logo {
+            width: 31px;
+            height: 31px;
             border-radius: 8px;
+            background: var(--accent);
             display: flex;
             align-items: center;
             justify-content: center;
-            background: var(--accent);
-            color: white;
             font-weight: 800;
-            font-size: 16px;
+            color: white;
         }
 
         .brand-name {
@@ -104,26 +101,23 @@
         }
 
         .new-chat {
-            width: 100%;
             display: flex;
             align-items: center;
             gap: 10px;
+            width: 100%;
             padding: 11px 12px;
+            margin: 4px 0 15px;
             border-radius: 8px;
-            background: transparent;
             color: var(--text);
+            background: transparent;
             cursor: pointer;
             text-align: left;
-            margin-bottom: 14px;
         }
 
-        .new-chat:hover {
+        .new-chat:hover,
+        .history-item:hover,
+        .account:hover {
             background: var(--sidebar-hover);
-        }
-
-        .new-chat-icon {
-            font-size: 20px;
-            font-weight: 300;
         }
 
         .history-title {
@@ -154,10 +148,6 @@
             text-overflow: ellipsis;
         }
 
-        .history-item:hover {
-            background: var(--sidebar-hover);
-        }
-
         .history-item.active {
             background: #2a2a2a;
         }
@@ -173,27 +163,17 @@
             gap: 10px;
             padding: 10px 12px;
             border-radius: 8px;
-            cursor: pointer;
-        }
-
-        .account:hover {
-            background: var(--sidebar-hover);
         }
 
         .avatar {
             width: 30px;
             height: 30px;
             border-radius: 50%;
+            background: #555;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #555;
-            font-size: 13px;
             font-weight: 600;
-        }
-
-        .account-text {
-            min-width: 0;
         }
 
         .account-name {
@@ -202,8 +182,8 @@
         }
 
         .account-sub {
-            font-size: 11px;
             color: var(--muted);
+            font-size: 11px;
         }
 
         /* MAIN */
@@ -217,22 +197,16 @@
             position: relative;
         }
 
-        /* TOPBAR */
-
         .topbar {
             height: 56px;
             display: flex;
             align-items: center;
             padding: 0 14px;
-            flex-shrink: 0;
         }
 
-        .menu-button {
+        .menu {
             width: 38px;
             height: 38px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             border-radius: 8px;
             background: transparent;
             color: var(--text);
@@ -240,7 +214,7 @@
             font-size: 21px;
         }
 
-        .menu-button:hover {
+        .menu:hover {
             background: #2a2a2a;
         }
 
@@ -254,16 +228,16 @@
 
         .chat {
             flex: 1;
-            min-height: 0;
             overflow-y: auto;
-            scroll-behavior: smooth;
         }
 
         .chat-inner {
             width: min(820px, calc(100% - 32px));
-            margin: 0 auto;
-            padding: 28px 0 170px;
+            margin: auto;
+            padding: 20px 0 180px;
         }
+
+        /* WELCOME */
 
         .welcome {
             min-height: calc(100vh - 240px);
@@ -276,28 +250,27 @@
         }
 
         .welcome-logo {
-            width: 50px;
-            height: 50px;
-            border-radius: 14px;
+            width: 54px;
+            height: 54px;
+            border-radius: 15px;
+            background: var(--accent);
             display: flex;
             align-items: center;
             justify-content: center;
-            background: var(--accent);
-            font-size: 24px;
+            font-size: 25px;
             font-weight: 800;
             margin-bottom: 18px;
         }
 
         .welcome h1 {
+            margin: 0 0 8px;
             font-size: 30px;
-            margin: 0 0 10px;
             font-weight: 600;
         }
 
         .welcome p {
             margin: 0;
             color: var(--muted);
-            font-size: 15px;
         }
 
         .suggestions {
@@ -309,12 +282,12 @@
         }
 
         .suggestion {
-            padding: 14px;
+            padding: 15px;
             text-align: left;
-            color: #ddd;
-            background: #2a2a2a;
-            border: 1px solid #343434;
+            border: 1px solid #353535;
             border-radius: 10px;
+            background: #292929;
+            color: #ddd;
             cursor: pointer;
         }
 
@@ -325,7 +298,7 @@
         .suggestion-title {
             font-size: 14px;
             font-weight: 600;
-            margin-bottom: 4px;
+            margin-bottom: 5px;
         }
 
         .suggestion-text {
@@ -333,7 +306,7 @@
             font-size: 12px;
         }
 
-        /* MESSAGE */
+        /* MESSAGES */
 
         .message {
             display: flex;
@@ -353,32 +326,24 @@
             font-weight: 700;
         }
 
-        .message.user .message-avatar {
+        .user .message-avatar {
             background: #555;
         }
 
-        .message.ai .message-avatar {
+        .ai .message-avatar {
             background: var(--accent);
         }
 
         .message-content {
-            min-width: 0;
             flex: 1;
-            line-height: 1.65;
+            min-width: 0;
             font-size: 15px;
-        }
-
-        .message-content p {
-            margin: 0 0 12px;
-        }
-
-        .message-content p:last-child {
-            margin-bottom: 0;
+            line-height: 1.65;
         }
 
         /* CODE */
 
-        .code-wrapper {
+        .code-box {
             margin: 14px 0;
             border: 1px solid #3b3b3b;
             border-radius: 9px;
@@ -386,7 +351,7 @@
             background: var(--code);
         }
 
-        .code-header {
+        .code-head {
             height: 38px;
             display: flex;
             align-items: center;
@@ -402,7 +367,7 @@
             gap: 6px;
         }
 
-        .code-button {
+        .code-btn {
             padding: 5px 9px;
             border-radius: 5px;
             background: #3a3a3a;
@@ -411,7 +376,7 @@
             font-size: 11px;
         }
 
-        .code-button:hover {
+        .code-btn:hover {
             background: #4a4a4a;
         }
 
@@ -425,7 +390,7 @@
             line-height: 1.6;
         }
 
-        /* INPUT AREA */
+        /* INPUT */
 
         .input-area {
             position: absolute;
@@ -441,125 +406,99 @@
 
         .input-container {
             width: min(820px, 100%);
-            margin: 0 auto;
+            margin: auto;
         }
 
         .input-box {
             display: flex;
             align-items: flex-end;
-            gap: 8px;
-            padding: 10px 10px 10px 15px;
+            gap: 7px;
+            padding: 10px 10px 10px 14px;
             background: var(--input);
             border: 1px solid #444;
             border-radius: 16px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
         }
 
-        .input-box:focus-within {
-            border-color: #555;
-        }
-
-        #messageInput {
+        #input {
             flex: 1;
             min-height: 26px;
             max-height: 180px;
             resize: none;
             overflow-y: auto;
+            outline: none;
             border: 0;
-            outline: 0;
             background: transparent;
             color: var(--text);
-            line-height: 1.5;
             font-size: 15px;
+            line-height: 1.5;
             padding: 5px 0;
         }
 
-        #messageInput::placeholder {
+        #input::placeholder {
             color: #999;
         }
 
-        .input-tools {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .tool-button {
+        .input-button {
             width: 34px;
             height: 34px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             border-radius: 9px;
             background: transparent;
             color: #aaa;
             cursor: pointer;
-            font-size: 18px;
+            font-size: 17px;
         }
 
-        .tool-button:hover {
+        .input-button:hover {
             background: #444;
             color: white;
         }
 
-        .send-button {
-            width: 34px;
-            height: 34px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 9px;
+        .send {
             background: #555;
             color: white;
-            cursor: pointer;
-            font-size: 17px;
         }
 
-        .send-button.active {
+        .send.active {
             background: white;
             color: black;
         }
 
-        .send-button:hover {
-            opacity: 0.9;
-        }
-
         .disclaimer {
+            margin-top: 9px;
             text-align: center;
             color: #777;
             font-size: 11px;
-            margin-top: 9px;
         }
 
-        /* RUN CODE */
+        /* TERMINAL */
 
-        .run-panel {
+        .terminal {
             display: none;
-            margin-top: 12px;
+            margin-top: 10px;
             border: 1px solid #3b3b3b;
             border-radius: 9px;
             overflow: hidden;
-            background: #151515;
+            background: #111;
         }
 
-        .run-panel.show {
+        .terminal.show {
             display: block;
         }
 
-        .run-header {
-            height: 38px;
+        .terminal-head {
+            height: 36px;
             display: flex;
-            align-items: center;
             justify-content: space-between;
+            align-items: center;
             padding: 0 12px;
             background: #292929;
             font-size: 12px;
         }
 
-        .run-output {
-            max-height: 250px;
-            overflow: auto;
+        .terminal-output {
             padding: 12px;
+            max-height: 220px;
+            overflow: auto;
             white-space: pre-wrap;
             font-family: Consolas, monospace;
             font-size: 12px;
@@ -570,16 +509,11 @@
 
         ::-webkit-scrollbar {
             width: 8px;
-            height: 8px;
         }
 
         ::-webkit-scrollbar-thumb {
             background: #444;
             border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: transparent;
         }
 
         /* MOBILE */
@@ -592,11 +526,7 @@
                 left: 0;
                 top: 0;
                 bottom: 0;
-                box-shadow: 8px 0 30px rgba(0, 0, 0, 0.35);
-            }
-
-            .sidebar.hidden {
-                width: 0;
+                box-shadow: 8px 0 30px rgba(0,0,0,.4);
             }
 
             .mobile-title {
@@ -605,7 +535,6 @@
 
             .chat-inner {
                 width: calc(100% - 24px);
-                padding-top: 15px;
             }
 
             .suggestions {
@@ -636,17 +565,15 @@
 
 <div class="app">
 
-    <!-- SIDEBAR -->
-
     <aside class="sidebar" id="sidebar">
 
         <div class="brand">
-            <div class="brand-icon">P</div>
+            <div class="logo">P</div>
             <div class="brand-name">PPai</div>
         </div>
 
         <button class="new-chat" onclick="newChat()">
-            <span class="new-chat-icon">＋</span>
+            <span>＋</span>
             <span>Chat mới</span>
         </button>
 
@@ -654,24 +581,13 @@
             Lịch sử
         </div>
 
-        <div class="history" id="history">
-
-            <button class="history-item active">
-                <span>💬</span>
-                <span>Cuộc trò chuyện mới</span>
-            </button>
-
-        </div>
+        <div class="history" id="history"></div>
 
         <div class="sidebar-bottom">
-
             <div class="account">
+                <div class="avatar">P</div>
 
-                <div class="avatar">
-                    P
-                </div>
-
-                <div class="account-text">
+                <div>
                     <div class="account-name">
                         PPai
                     </div>
@@ -680,23 +596,18 @@
                         Python AI
                     </div>
                 </div>
-
             </div>
-
         </div>
 
     </aside>
-
-    <!-- MAIN -->
 
     <main class="main">
 
         <header class="topbar">
 
             <button
-                class="menu-button"
+                class="menu"
                 onclick="toggleSidebar()"
-                title="Mở/đóng thanh bên"
             >
                 ☰
             </button>
@@ -707,13 +618,9 @@
 
         </header>
 
-        <!-- CHAT -->
-
         <section class="chat" id="chat">
 
             <div class="chat-inner" id="chatInner">
-
-                <!-- WELCOME -->
 
                 <div class="welcome" id="welcome">
 
@@ -733,53 +640,53 @@
 
                         <button
                             class="suggestion"
-                            onclick="useSuggestion('Viết cho tôi một chương trình Python tính toán cơ bản')"
+                            onclick="suggest('Viết cho tôi một chương trình Python tính toán cơ bản')"
                         >
                             <div class="suggestion-title">
                                 Viết code Python
                             </div>
 
                             <div class="suggestion-text">
-                                Tạo chương trình từ mô tả của tôi
+                                Tạo chương trình từ mô tả
                             </div>
                         </button>
 
                         <button
                             class="suggestion"
-                            onclick="useSuggestion('Giải thích code Python này cho tôi')"
+                            onclick="suggest('Giải thích Python cho tôi')"
                         >
                             <div class="suggestion-title">
-                                Giải thích code
+                                Học Python
                             </div>
 
                             <div class="suggestion-text">
-                                Hiểu code Python dễ hơn
+                                Giải thích lập trình dễ hiểu
                             </div>
                         </button>
 
                         <button
                             class="suggestion"
-                            onclick="useSuggestion('Sửa lỗi trong code Python của tôi')"
+                            onclick="suggest('Sửa lỗi code Python của tôi')"
                         >
                             <div class="suggestion-title">
                                 Sửa lỗi
                             </div>
 
                             <div class="suggestion-text">
-                                Tìm và sửa lỗi trong code
+                                Phân tích lỗi trong code
                             </div>
                         </button>
 
                         <button
                             class="suggestion"
-                            onclick="useSuggestion('Tạo cho tôi một game Python đơn giản')"
+                            onclick="suggest('Tạo game đoán số bằng Python')"
                         >
                             <div class="suggestion-title">
-                                Tạo project
+                                Tạo game
                             </div>
 
                             <div class="suggestion-text">
-                                Bắt đầu một chương trình mới
+                                Bắt đầu một project Python
                             </div>
                         </button>
 
@@ -791,8 +698,6 @@
 
         </section>
 
-        <!-- INPUT -->
-
         <div class="input-area">
 
             <div class="input-container">
@@ -800,53 +705,43 @@
                 <div class="input-box">
 
                     <button
-                        class="tool-button"
-                        onclick="insertCodeTemplate()"
-                        title="Thêm code"
+                        class="input-button"
+                        onclick="insertTemplate()"
+                        title="Code"
                     >
                         +
                     </button>
 
                     <textarea
-                        id="messageInput"
+                        id="input"
                         rows="1"
                         placeholder="Nhắn tin với PPai..."
                     ></textarea>
 
-                    <div class="input-tools">
-
-                        <button
-                            class="tool-button"
-                            onclick="runCurrentCode()"
-                            title="Chạy Python"
-                        >
-                            ▶
-                        </button>
-
-                        <button
-                            class="send-button"
-                            id="sendButton"
-                            onclick="sendMessage()"
-                            title="Gửi"
-                        >
-                            ↑
-                        </button>
-
-                    </div>
+                    <button
+                        class="input-button send"
+                        id="send"
+                        onclick="sendMessage()"
+                    >
+                        ↑
+                    </button>
 
                 </div>
 
-                <div class="run-panel" id="runPanel">
+                <div
+                    class="terminal"
+                    id="terminal"
+                >
 
-                    <div class="run-header">
+                    <div class="terminal-head">
 
                         <span>
-                            Python Terminal
+                            Python
                         </span>
 
                         <button
-                            class="code-button"
-                            onclick="closeRunPanel()"
+                            class="code-btn"
+                            onclick="closeTerminal()"
                         >
                             Đóng
                         </button>
@@ -854,11 +749,9 @@
                     </div>
 
                     <div
-                        class="run-output"
-                        id="runOutput"
-                    >
-                        Chưa chạy code.
-                    </div>
+                        class="terminal-output"
+                        id="terminalOutput"
+                    ></div>
 
                 </div>
 
@@ -875,17 +768,27 @@
 </div>
 
 <script>
-    const sidebar = document.getElementById("sidebar");
+    /*
+        PPai chạy trực tiếp trên GitHub Pages.
+
+        Không dùng:
+        fetch("/ai")
+        fetch("/run")
+
+        AI hiện tại là local/demo JavaScript.
+        server.py và ai.py vẫn có thể dùng cho backend
+        trong phiên bản sau.
+    */
+
+    const input = document.getElementById("input");
+    const send = document.getElementById("send");
     const chat = document.getElementById("chat");
     const chatInner = document.getElementById("chatInner");
-    const welcome = document.getElementById("welcome");
-    const messageInput = document.getElementById("messageInput");
-    const sendButton = document.getElementById("sendButton");
+    const sidebar = document.getElementById("sidebar");
     const history = document.getElementById("history");
-    const runPanel = document.getElementById("runPanel");
-    const runOutput = document.getElementById("runOutput");
 
     let currentCode = "";
+    let chats = [];
 
     /* SIDEBAR */
 
@@ -896,80 +799,508 @@
     /* NEW CHAT */
 
     function newChat() {
-        chatInner.innerHTML = "";
-
-        const newWelcome = document.createElement("div");
-
-        newWelcome.className = "welcome";
-
-        newWelcome.innerHTML = `
-            <div class="welcome-logo">P</div>
-
-            <h1>PPai</h1>
-
-            <p>AI lập trình Python của bạn</p>
-
-            <div class="suggestions">
-
-                <button class="suggestion"
-                    onclick="useSuggestion('Viết cho tôi một chương trình Python tính toán cơ bản')">
-                    <div class="suggestion-title">
-                        Viết code Python
-                    </div>
-                    <div class="suggestion-text">
-                        Tạo chương trình từ mô tả của tôi
-                    </div>
-                </button>
-
-                <button class="suggestion"
-                    onclick="useSuggestion('Giải thích code Python này cho tôi')">
-                    <div class="suggestion-title">
-                        Giải thích code
-                    </div>
-                    <div class="suggestion-text">
-                        Hiểu code Python dễ hơn
-                    </div>
-                </button>
-
-                <button class="suggestion"
-                    onclick="useSuggestion('Sửa lỗi trong code Python của tôi')">
-                    <div class="suggestion-title">
-                        Sửa lỗi
-                    </div>
-                    <div class="suggestion-text">
-                        Tìm và sửa lỗi trong code
-                    </div>
-                </button>
-
-                <button class="suggestion"
-                    onclick="useSuggestion('Tạo cho tôi một game Python đơn giản')">
-                    <div class="suggestion-title">
-                        Tạo project
-                    </div>
-                    <div class="suggestion-text">
-                        Bắt đầu một chương trình mới
-                    </div>
-                </button>
-
-            </div>
-        `;
-
-        chatInner.appendChild(newWelcome);
 
         currentCode = "";
 
-        addHistoryItem("Cuộc trò chuyện mới");
+        chatInner.innerHTML = `
+            <div class="welcome" id="welcome">
 
-        messageInput.value = "";
+                <div class="welcome-logo">P</div>
+
+                <h1>PPai</h1>
+
+                <p>AI lập trình Python của bạn</p>
+
+                <div class="suggestions">
+
+                    <button class="suggestion"
+                        onclick="suggest('Viết cho tôi một chương trình Python tính toán cơ bản')">
+
+                        <div class="suggestion-title">
+                            Viết code Python
+                        </div>
+
+                        <div class="suggestion-text">
+                            Tạo chương trình từ mô tả
+                        </div>
+
+                    </button>
+
+                    <button class="suggestion"
+                        onclick="suggest('Giải thích Python cho tôi')">
+
+                        <div class="suggestion-title">
+                            Học Python
+                        </div>
+
+                        <div class="suggestion-text">
+                            Giải thích lập trình dễ hiểu
+                        </div>
+
+                    </button>
+
+                    <button class="suggestion"
+                        onclick="suggest('Sửa lỗi code Python của tôi')">
+
+                        <div class="suggestion-title">
+                            Sửa lỗi
+                        </div>
+
+                        <div class="suggestion-text">
+                            Phân tích lỗi trong code
+                        </div>
+
+                    </button>
+
+                    <button class="suggestion"
+                        onclick="suggest('Tạo game đoán số bằng Python')">
+
+                        <div class="suggestion-title">
+                            Tạo game
+                        </div>
+
+                        <div class="suggestion-text">
+                            Bắt đầu một project Python
+                        </div>
+
+                    </button>
+
+                </div>
+            </div>
+        `;
+
+        input.value = "";
+
         autoResize();
+        updateSend();
 
         chat.scrollTop = 0;
     }
 
-    function addHistoryItem(title) {
-        const item = document.createElement("button");
+    /* SUGGESTION */
 
-        item.className = "history-item";
+    function suggest(text) {
+        input.value = text;
+        autoResize();
+        updateSend();
+        sendMessage();
+    }
+
+    /* SEND */
+
+    function sendMessage() {
+
+        const text = input.value.trim();
+
+        if (!text) {
+            return;
+        }
+
+        const welcome = document.getElementById("welcome");
+
+        if (welcome) {
+            welcome.remove();
+        }
+
+        addMessage(
+            "user",
+            escapeHTML(text).replace(/\n/g, "<br>")
+        );
+
+        addHistory(text);
+
+        input.value = "";
+
+        autoResize();
+        updateSend();
+
+        setTimeout(function() {
+
+            const response =
+                localAI(text);
+
+            addMessage(
+                "ai",
+                formatResponse(response)
+            );
+
+        }, 350);
+    }
+
+    /* MESSAGE */
+
+    function addMessage(type, content) {
+
+        const message =
+            document.createElement("div");
+
+        message.className =
+            "message " + type;
+
+        message.innerHTML = `
+            <div class="message-avatar">
+                ${type === "user" ? "U" : "P"}
+            </div>
+
+            <div class="message-content">
+                ${content}
+            </div>
+        `;
+
+        chatInner.appendChild(message);
+
+        chat.scrollTop =
+            chat.scrollHeight;
+    }
+
+    /* LOCAL AI */
+
+    function localAI(message) {
+
+        const text =
+            message.toLowerCase();
+
+        /*
+            CALCULATOR
+        */
+
+        if (
+            text.includes("máy tính") ||
+            text.includes("calculator") ||
+            text.includes("tính toán")
+        ) {
+
+            currentCode =
+`a = float(input("Số thứ nhất: "))
+b = float(input("Số thứ hai: "))
+
+print("Tổng:", a + b)
+print("Hiệu:", a - b)
+print("Tích:", a * b)
+
+if b != 0:
+    print("Thương:", a / b)
+else:
+    print("Không thể chia cho 0.")`;
+
+            return {
+                text:
+                    "Đây là chương trình máy tính Python:",
+                code: currentCode
+            };
+        }
+
+        /*
+            FIBONACCI
+        */
+
+        if (text.includes("fibonacci")) {
+
+            currentCode =
+`n = int(input("Nhập số lượng phần tử: "))
+
+a = 0
+b = 1
+
+for _ in range(n):
+    print(a, end=" ")
+    a, b = b, a + b
+
+print()`;
+
+            return {
+                text:
+                    "Đây là chương trình Fibonacci:",
+                code: currentCode
+            };
+        }
+
+        /*
+            GUESS GAME
+        */
+
+        if (
+            text.includes("đoán số") ||
+            text.includes("guess game")
+        ) {
+
+            currentCode =
+`import random
+
+number = random.randint(1, 100)
+
+print("Tao đã chọn một số từ 1 đến 100.")
+
+while True:
+    try:
+        guess = int(input("Đoán số: "))
+    except ValueError:
+        print("Hãy nhập một số.")
+        continue
+
+    if guess < number:
+        print("Lớn hơn.")
+    elif guess > number:
+        print("Nhỏ hơn.")
+    else:
+        print("Đúng rồi!")
+        break`;
+
+            return {
+                text:
+                    "Game đoán số Python:",
+                code: currentCode
+            };
+        }
+
+        /*
+            PRIME
+        */
+
+        if (
+            text.includes("số nguyên tố") ||
+            text.includes("prime")
+        ) {
+
+            currentCode =
+`n = int(input("Nhập số: "))
+
+if n < 2:
+    print("Không phải số nguyên tố.")
+else:
+    is_prime = True
+
+    for i in range(2, int(n ** 0.5) + 1):
+        if n % i == 0:
+            is_prime = False
+            break
+
+    if is_prime:
+        print("Là số nguyên tố.")
+    else:
+        print("Không phải số nguyên tố.")`;
+
+            return {
+                text:
+                    "Đây là chương trình kiểm tra số nguyên tố:",
+                code: currentCode
+            };
+        }
+
+        /*
+            HELLO
+        */
+
+        if (
+            text.includes("hello") ||
+            text.includes("xin chào") ||
+            text.includes("chào")
+        ) {
+
+            currentCode =
+`name = input("Tên của bạn: ")
+
+print("Xin chào,", name)
+print("Chào mừng đến với PPai!")`;
+
+            return {
+                text:
+                    "Một chương trình Python đơn giản:",
+                code: currentCode
+            };
+        }
+
+        /*
+            PYTHON
+        */
+
+        if (
+            text.includes("python") ||
+            text.includes("lập trình")
+        ) {
+
+            return {
+                text:
+                    "PPai hiện đang chạy ở chế độ GitHub Pages local demo.\n\n" +
+                    "Tao có thể tạo một số chương trình Python mẫu, " +
+                    "giải thích cú pháp cơ bản và tạo code trực tiếp " +
+                    "trong cuộc trò chuyện.\n\n" +
+                    "Backend Python (`server.py` và `ai.py`) vẫn nằm " +
+                    "trong repo để dùng khi PPai có server thật."
+            };
+        }
+
+        /*
+            DEFAULT
+        */
+
+        return {
+            text:
+                "Tao đã nhận yêu cầu:\n\n" +
+                message +
+                "\n\n" +
+                "PPai hiện đang chạy bản AI demo trực tiếp trên GitHub Pages. " +
+                "Để có AI model thực sự, cần kết nối backend/API ở phía server."
+        };
+    }
+
+    /* FORMAT RESPONSE */
+
+    function formatResponse(response) {
+
+        let html =
+            "<p>" +
+            escapeHTML(response.text || "") +
+            "</p>";
+
+        if (response.code) {
+
+            const safeCode =
+                escapeHTML(response.code);
+
+            html += `
+                <div class="code-box">
+
+                    <div class="code-head">
+
+                        <span>python</span>
+
+                        <div class="code-actions">
+
+                            <button
+                                class="code-btn"
+                                onclick="copyCode(this)"
+                            >
+                                Copy
+                            </button>
+
+                            <button
+                                class="code-btn"
+                                onclick="runCode(this)"
+                            >
+                                ▶ Chạy
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <pre>${safeCode}</pre>
+
+                </div>
+            `;
+        }
+
+        return html.replace(
+            /\n/g,
+            "<br>"
+        );
+    }
+
+    /* COPY */
+
+    function copyCode(button) {
+
+        const box =
+            button.closest(".code-box");
+
+        const code =
+            box.querySelector("pre").textContent;
+
+        navigator.clipboard.writeText(code)
+            .then(function() {
+
+                const old =
+                    button.textContent;
+
+                button.textContent =
+                    "Đã copy";
+
+                setTimeout(function() {
+                    button.textContent = old;
+                }, 1500);
+
+            })
+            .catch(function() {
+
+                button.textContent =
+                    "Lỗi";
+            });
+    }
+
+    /* RUN */
+
+    function runCode(button) {
+
+        const box =
+            button.closest(".code-box");
+
+        const code =
+            box.querySelector("pre").textContent;
+
+        /*
+            GitHub Pages không thể chạy
+            Python server-side.
+
+            Thay vào đó thông báo rõ ràng.
+        */
+
+        const terminal =
+            document.getElementById("terminal");
+
+        const output =
+            document.getElementById("terminalOutput");
+
+        terminal.classList.add("show");
+
+        output.textContent =
+`PPai > Python
+
+Code đã được nhận.
+
+GitHub Pages chỉ chạy JavaScript,
+không thể thực thi Python trực tiếp trên server.
+
+Để chạy code Python thật,
+PPai cần backend Python (server.py)
+hoặc một Python runtime chạy trong trình duyệt.`;
+    }
+
+    /* INSERT */
+
+    function insertTemplate() {
+
+        currentCode =
+`# Code Python
+
+print("Hello from PPai!")`;
+
+        input.value =
+            "Hãy giúp tôi với đoạn code Python này:\n\n" +
+            currentCode;
+
+        autoResize();
+        updateSend();
+        input.focus();
+    }
+
+    /* TERMINAL */
+
+    function closeTerminal() {
+        document
+            .getElementById("terminal")
+            .classList.remove("show");
+    }
+
+    /* HISTORY */
+
+    function addHistory(title) {
+
+        const item =
+            document.createElement("button");
+
+        item.className =
+            "history-item";
 
         item.innerHTML = `
             <span>💬</span>
@@ -977,327 +1308,31 @@
         `;
 
         history.prepend(item);
-    }
-
-    /* SUGGESTION */
-
-    function useSuggestion(text) {
-        messageInput.value = text;
-        autoResize();
-        updateSendButton();
-        sendMessage();
-    }
-
-    /* SEND */
-
-    async function sendMessage() {
-
-        const text = messageInput.value.trim();
-
-        if (!text) {
-            return;
-        }
-
-        if (welcome) {
-            welcome.remove();
-        }
-
-        addMessage("user", text);
-
-        messageInput.value = "";
-        autoResize();
-        updateSendButton();
-
-        const thinking = addMessage(
-            "ai",
-            "Đang suy nghĩ..."
-        );
-
-        try {
-
-            const response = await fetch("/ai", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    message: text,
-                    code: currentCode
-                })
-            });
-
-            const data = await response.json();
-
-            if (data.response) {
-
-                thinking.querySelector(
-                    ".message-content"
-                ).innerHTML =
-                    formatAIResponse(data.response);
-
-            } else {
-
-                thinking.querySelector(
-                    ".message-content"
-                ).textContent =
-                    data.error || "PPai không trả lời được.";
-            }
-
-        } catch (error) {
-
-            thinking.querySelector(
-                ".message-content"
-            ).innerHTML = `
-                <p>Không thể kết nối tới <b>server.py</b>.</p>
-                <p style="color:#999">
-                    Hãy kiểm tra server có đang chạy không.
-                </p>
-            `;
-        }
-
-        chat.scrollTop = chat.scrollHeight;
-    }
-
-    /* MESSAGE */
-
-    function addMessage(type, text) {
-
-        const message = document.createElement("div");
-
-        message.className = "message " + type;
-
-        const avatar =
-            type === "user"
-                ? "U"
-                : "P";
-
-        message.innerHTML = `
-            <div class="message-avatar">
-                ${avatar}
-            </div>
-
-            <div class="message-content">
-                ${type === "user"
-                    ? escapeHTML(text).replace(/\n/g, "<br>")
-                    : escapeHTML(text)
-                }
-            </div>
-        `;
-
-        chatInner.appendChild(message);
-
-        chat.scrollTop = chat.scrollHeight;
-
-        return message;
-    }
-
-    /* FORMAT AI */
-
-    function formatAIResponse(text) {
-
-        let escaped = escapeHTML(text);
 
         /*
-         * ```python
-         * code
-         * ```
-         */
+            Giới hạn lịch sử hiển thị
+        */
 
-        escaped = escaped.replace(
-            /```(?:python|py)?\s*([\s\S]*?)```/gi,
-            function(_, code) {
-
-                const cleanCode = code.trim();
-
-                return `
-                    <div class="code-wrapper">
-
-                        <div class="code-header">
-
-                            <span>python</span>
-
-                            <div class="code-actions">
-
-                                <button
-                                    class="code-button"
-                                    onclick="copyCode(this)"
-                                >
-                                    Copy
-                                </button>
-
-                                <button
-                                    class="code-button"
-                                    onclick="runCodeBlock(this)"
-                                >
-                                    ▶ Chạy
-                                </button>
-
-                            </div>
-
-                        </div>
-
-                        <pre>${cleanCode}</pre>
-
-                    </div>
-                `;
-            }
-        );
-
-        escaped = escaped.replace(
-            /\n\n/g,
-            "<br><br>"
-        );
-
-        escaped = escaped.replace(
-            /\n/g,
-            "<br>"
-        );
-
-        return escaped;
-    }
-
-    /* COPY CODE */
-
-    async function copyCode(button) {
-
-        const wrapper =
-            button.closest(".code-wrapper");
-
-        const code =
-            wrapper.querySelector("pre").textContent;
-
-        try {
-
-            await navigator.clipboard.writeText(code);
-
-            const oldText = button.textContent;
-
-            button.textContent = "Đã copy";
-
-            setTimeout(() => {
-                button.textContent = oldText;
-            }, 1500);
-
-        } catch {
-            button.textContent = "Lỗi";
+        while (
+            history.children.length > 20
+        ) {
+            history.removeChild(
+                history.lastChild
+            );
         }
-    }
-
-    /* RUN CODE BLOCK */
-
-    async function runCodeBlock(button) {
-
-        const wrapper =
-            button.closest(".code-wrapper");
-
-        const code =
-            wrapper.querySelector("pre").textContent;
-
-        currentCode = code;
-
-        await runPython(code);
-    }
-
-    /* RUN CURRENT */
-
-    async function runCurrentCode() {
-
-        if (!currentCode.trim()) {
-
-            runPanel.classList.add("show");
-
-            runOutput.textContent =
-                "Chưa có code Python.\n\n" +
-                "Hãy yêu cầu PPai viết code trước.";
-
-            return;
-        }
-
-        await runPython(currentCode);
-    }
-
-    /* RUN PYTHON */
-
-    async function runPython(code) {
-
-        runPanel.classList.add("show");
-
-        runOutput.textContent =
-            "PPai > Đang chạy Python...\n";
-
-        try {
-
-            const response = await fetch("/run", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    code: code
-                })
-            });
-
-            const data = await response.json();
-
-            if (data.output !== undefined) {
-
-                runOutput.textContent =
-                    data.output || "(Không có output)";
-
-            } else {
-
-                runOutput.textContent =
-                    data.error || "Không có kết quả.";
-            }
-
-        } catch (error) {
-
-            runOutput.textContent =
-                "Không thể kết nối server.py.\n\n" +
-                error;
-        }
-
-        chat.scrollTop = chat.scrollHeight;
-    }
-
-    /* CLOSE TERMINAL */
-
-    function closeRunPanel() {
-        runPanel.classList.remove("show");
-    }
-
-    /* CODE TEMPLATE */
-
-    function insertCodeTemplate() {
-
-        const template =
-`# Code Python của bạn
-
-print("Hello from PPai!")
-`;
-
-        currentCode = template;
-
-        messageInput.value =
-            "Hãy xem và giúp tôi với đoạn code Python này:\n\n" +
-            template;
-
-        autoResize();
-        updateSendButton();
-        messageInput.focus();
     }
 
     /* INPUT */
 
-    messageInput.addEventListener(
+    input.addEventListener(
         "input",
         function() {
             autoResize();
-            updateSendButton();
+            updateSend();
         }
     );
 
-    messageInput.addEventListener(
+    input.addEventListener(
         "keydown",
         function(event) {
 
@@ -1313,25 +1348,26 @@ print("Hello from PPai!")
 
     function autoResize() {
 
-        messageInput.style.height = "auto";
+        input.style.height =
+            "auto";
 
-        messageInput.style.height =
+        input.style.height =
             Math.min(
-                messageInput.scrollHeight,
+                input.scrollHeight,
                 180
             ) + "px";
     }
 
-    function updateSendButton() {
+    function updateSend() {
 
-        if (messageInput.value.trim()) {
-            sendButton.classList.add("active");
+        if (input.value.trim()) {
+            send.classList.add("active");
         } else {
-            sendButton.classList.remove("active");
+            send.classList.remove("active");
         }
     }
 
-    /* ESCAPE HTML */
+    /* ESCAPE */
 
     function escapeHTML(value) {
 
@@ -1343,7 +1379,7 @@ print("Hello from PPai!")
             .replace(/'/g, "&#039;");
     }
 
-    /* KEYBOARD */
+    /* CTRL + K */
 
     document.addEventListener(
         "keydown",
@@ -1353,18 +1389,15 @@ print("Hello from PPai!")
                 event.ctrlKey &&
                 event.key.toLowerCase() === "k"
             ) {
+
                 event.preventDefault();
 
-                messageInput.focus();
-            }
-
-            if (event.key === "Escape") {
-                closeRunPanel();
+                input.focus();
             }
         }
     );
 
-    updateSendButton();
+    updateSend();
 </script>
 
 </body>
