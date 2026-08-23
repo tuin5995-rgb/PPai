@@ -3,133 +3,134 @@ import json
 import re
 
 
-def get_python_help(message, code):
-    text = message.lower()
+APP_NAME = "PPai"
 
-    if "sửa" in text or "fix" in text or "lỗi" in text:
-        if not code.strip():
-            return "Mày chưa có code để sửa."
 
-        return (
-            "Tao đã nhận code.\n\n"
-            "Code hiện tại:\n"
-            "```python\n"
-            + code +
-            "\n```\n\n"
-            "Bản AI thật sẽ phân tích lỗi và sửa trực tiếp đoạn code này."
-        )
+def clean_message(message):
+    return message.strip()
 
-    if "giải thích" in text or "explain" in text:
-        if not code.strip():
-            return "Mày chưa có code để giải thích."
 
-        return (
-            "Code này có:\n\n"
-            + explain_code(code)
-        )
+def extract_code(message):
+    """
+    Tìm code Python nằm trong markdown:
+    ```python
+    ...
+    ```
+    """
 
-    if "hello" in text or "xin chào" in text:
-        return "Xin chào. PPai AI đang hoạt động."
-
-    if "python" in text:
-        return (
-            "Python đã sẵn sàng.\n\n"
-            "Mày có thể yêu cầu:\n"
-            "- Viết code\n"
-            "- Sửa lỗi\n"
-            "- Giải thích code\n"
-            "- Tối ưu code\n"
-            "- Tạo project"
-        )
-
-    return (
-        "PPai AI đã nhận yêu cầu:\n\n"
-        + message +
-        "\n\n"
-        "Hiện tại đây là AI thử nghiệm. "
-        "Hãy kết nối model thật vào ai.py để AI có thể sinh code."
+    match = re.search(
+        r"```(?:python|py)?\s*([\s\S]*?)```",
+        message,
+        re.IGNORECASE
     )
+
+    if match:
+        return match.group(1).strip()
+
+    return None
 
 
 def explain_code(code):
-    lines = code.splitlines()
+    if not code.strip():
+        return "Không có code để giải thích."
 
+    lines = code.splitlines()
     result = []
 
-    for number, line in enumerate(lines, 1):
+    for index, line in enumerate(lines, 1):
 
-        stripped = line.strip()
+        text = line.strip()
 
-        if not stripped:
+        if not text:
             continue
 
-        if stripped.startswith("#"):
+        if text.startswith("#"):
             result.append(
-                f"Dòng {number}: comment."
+                f"Dòng {index}: chú thích."
             )
 
-        elif stripped.startswith("print("):
+        elif text.startswith("print("):
             result.append(
-                f"Dòng {number}: in dữ liệu ra màn hình."
+                f"Dòng {index}: in dữ liệu ra màn hình."
             )
 
-        elif stripped.startswith("input("):
+        elif text.startswith("input("):
             result.append(
-                f"Dòng {number}: nhận dữ liệu từ người dùng."
+                f"Dòng {index}: nhận dữ liệu từ người dùng."
             )
 
-        elif stripped.startswith("def "):
-            name = stripped[4:].split("(")[0]
-
+        elif text.startswith("import "):
             result.append(
-                f"Dòng {number}: định nghĩa hàm `{name}`."
+                f"Dòng {index}: nhập một module/thư viện."
             )
 
-        elif stripped.startswith("if "):
+        elif text.startswith("from "):
             result.append(
-                f"Dòng {number}: kiểm tra điều kiện."
+                f"Dòng {index}: nhập thành phần từ một module."
             )
 
-        elif stripped.startswith("for "):
+        elif text.startswith("def "):
+            name = text[4:].split("(")[0]
+
             result.append(
-                f"Dòng {number}: tạo vòng lặp `for`."
+                f"Dòng {index}: định nghĩa hàm `{name}`."
             )
 
-        elif stripped.startswith("while "):
+        elif text.startswith("class "):
+            name = text[6:].split("(")[0].split(":")[0]
+
             result.append(
-                f"Dòng {number}: tạo vòng lặp `while`."
+                f"Dòng {index}: định nghĩa class `{name}`."
             )
 
-        elif "import " in stripped:
+        elif text.startswith("if "):
             result.append(
-                f"Dòng {number}: import thư viện/module."
+                f"Dòng {index}: kiểm tra điều kiện."
             )
 
-        elif "=" in stripped and not "==" in stripped:
+        elif text.startswith("elif "):
             result.append(
-                f"Dòng {number}: gán giá trị cho biến."
+                f"Dòng {index}: kiểm tra điều kiện khác."
+            )
+
+        elif text.startswith("else:"):
+            result.append(
+                f"Dòng {index}: nhánh còn lại của điều kiện."
+            )
+
+        elif text.startswith("for "):
+            result.append(
+                f"Dòng {index}: tạo vòng lặp `for`."
+            )
+
+        elif text.startswith("while "):
+            result.append(
+                f"Dòng {index}: tạo vòng lặp `while`."
+            )
+
+        elif text.startswith("return "):
+            result.append(
+                f"Dòng {index}: trả về một giá trị từ hàm."
+            )
+
+        elif "=" in text and "==" not in text:
+
+            result.append(
+                f"Dòng {index}: gán giá trị cho biến."
             )
 
         else:
-            result.append(
-                f"Dòng {number}: `{stripped}`"
-            )
 
-    if not result:
-        return "Code trống."
+            result.append(
+                f"Dòng {index}: thực hiện `{text}`."
+            )
 
     return "\n".join(result)
 
 
-def generate_basic_code(message):
+def generate_calculator():
 
-    text = message.lower()
-
-    if "hello" in text or "xin chào" in text:
-        return '''print("Hello, world!")'''
-
-    if "máy tính" in text or "calculator" in text:
-        return '''a = float(input("Số thứ nhất: "))
+    return '''a = float(input("Số thứ nhất: "))
 b = float(input("Số thứ hai: "))
 
 print("Tổng:", a + b)
@@ -141,80 +142,351 @@ if b != 0:
 else:
     print("Không thể chia cho 0.")'''
 
-    if "đoán số" in text:
-        return '''import random
 
-number = random.randint(1, 100)
+def generate_fibonacci():
 
-print("Tao đã chọn một số từ 1 đến 100.")
-
-while True:
-    guess = int(input("Đoán: "))
-
-    if guess < number:
-        print("Lớn hơn.")
-    elif guess > number:
-        print("Nhỏ hơn.")
-    else:
-        print("Đúng!")
-        break'''
-
-    if "fibonacci" in text:
-        return '''n = int(input("Nhập n: "))
+    return '''n = int(input("Nhập số lượng phần tử: "))
 
 a = 0
 b = 1
 
 for _ in range(n):
     print(a, end=" ")
-    a, b = b, a + b'''
+    a, b = b, a + b
+
+print()'''
+
+
+def generate_guess_game():
+
+    return '''import random
+
+number = random.randint(1, 100)
+
+print("Tao đã chọn một số từ 1 đến 100.")
+
+while True:
+    try:
+        guess = int(input("Đoán số: "))
+    except ValueError:
+        print("Hãy nhập một số.")
+        continue
+
+    if guess < number:
+        print("Lớn hơn.")
+    elif guess > number:
+        print("Nhỏ hơn.")
+    else:
+        print("Đúng rồi!")
+        break'''
+
+
+def generate_hello():
+
+    return '''name = input("Tên của bạn: ")
+
+print("Xin chào,", name)
+print("Chào mừng đến với PPai!")'''
+
+
+def generate_prime():
+
+    return '''n = int(input("Nhập số: "))
+
+if n < 2:
+    print("Không phải số nguyên tố.")
+else:
+    is_prime = True
+
+    for i in range(2, int(n ** 0.5) + 1):
+        if n % i == 0:
+            is_prime = False
+            break
+
+    if is_prime:
+        print("Là số nguyên tố.")
+    else:
+        print("Không phải số nguyên tố.")'''
+
+
+def generate_code(message):
+
+    text = message.lower()
+
+    if (
+        "máy tính" in text
+        or "calculator" in text
+        or "tính toán" in text
+    ):
+        return generate_calculator()
+
+    if "fibonacci" in text:
+        return generate_fibonacci()
+
+    if (
+        "đoán số" in text
+        or "guess game" in text
+    ):
+        return generate_guess_game()
+
+    if (
+        "hello" in text
+        or "xin chào" in text
+        or "chào" in text
+    ):
+        return generate_hello()
+
+    if (
+        "số nguyên tố" in text
+        or "prime" in text
+    ):
+        return generate_prime()
 
     return None
 
 
-def process(data):
+def is_explain_request(message):
 
-    message = data.get("message", "")
-    code = data.get("code", "")
+    text = message.lower()
 
-    if not isinstance(message, str):
-        return "Yêu cầu không hợp lệ."
+    words = [
+        "giải thích",
+        "giải nghĩa",
+        "explain",
+        "giải thích code"
+    ]
 
-    generated = generate_basic_code(message)
+    return any(
+        word in text
+        for word in words
+    )
 
-    if generated:
+
+def is_fix_request(message):
+
+    text = message.lower()
+
+    words = [
+        "sửa lỗi",
+        "sửa code",
+        "fix",
+        "debug",
+        "lỗi code",
+        "sửa giúp"
+    ]
+
+    return any(
+        word in text
+        for word in words
+    )
+
+
+def is_code_request(message):
+
+    text = message.lower()
+
+    words = [
+        "viết code",
+        "tạo code",
+        "viết chương trình",
+        "tạo chương trình",
+        "code python",
+        "python",
+        "lập trình"
+    ]
+
+    return any(
+        word in text
+        for word in words
+    )
+
+
+def build_response(message, current_code):
+
+    message = clean_message(message)
+
+    if not message:
+        return "Mày chưa nhập yêu cầu."
+
+    # -----------------------------
+    # EXPLAIN
+    # -----------------------------
+
+    if is_explain_request(message):
+
+        if current_code.strip():
+
+            explanation = explain_code(
+                current_code
+            )
+
+            return (
+                "## Giải thích code\n\n"
+                + explanation
+            )
+
+        extracted = extract_code(message)
+
+        if extracted:
+
+            explanation = explain_code(
+                extracted
+            )
+
+            return (
+                "## Giải thích code\n\n"
+                + explanation
+            )
 
         return (
-            "Tao tạo cho mày đoạn Python này:\n\n"
-            "```python\n"
-            + generated +
-            "\n```\n\n"
-            "Có thể đưa thẳng vào editor."
+            "Mày chưa đưa code cho tao giải thích."
         )
 
-    return get_python_help(message, code)
+    # -----------------------------
+    # FIX
+    # -----------------------------
+
+    if is_fix_request(message):
+
+        if current_code.strip():
+
+            return (
+                "## Phân tích code\n\n"
+                "Tao đã nhận đoạn code hiện tại "
+                "trong editor.\n\n"
+                "Code:\n\n"
+                "```python\n"
+                + current_code
+                + "\n```\n\n"
+                "Bản PPai local hiện tại chưa có "
+                "model thật để phân tích lỗi tự động. "
+                "Phần này sẽ được kết nối với AI model "
+                "ở phiên bản sau."
+            )
+
+        extracted = extract_code(message)
+
+        if extracted:
+
+            return (
+                "Tao đã nhận code:\n\n"
+                "```python\n"
+                + extracted
+                + "\n```\n\n"
+                "Hiện tại PPai local chưa có model "
+                "thật để debug tự động."
+            )
+
+        return (
+            "Hãy đưa code cần sửa vào editor "
+            "hoặc trong tin nhắn."
+        )
+
+    # -----------------------------
+    # GENERATE CODE
+    # -----------------------------
+
+    if is_code_request(message):
+
+        generated = generate_code(
+            message
+        )
+
+        if generated:
+
+            return (
+                "## Code Python\n\n"
+                "```python\n"
+                + generated
+                + "\n```\n\n"
+                "Mày có thể copy hoặc chạy trực tiếp "
+                "đoạn code này."
+            )
+
+        return (
+            "Tao hiểu là mày muốn viết Python.\n\n"
+            "Hiện tại PPai local có thể tạo một số "
+            "chương trình mẫu như:\n\n"
+            "- Máy tính\n"
+            "- Fibonacci\n"
+            "- Game đoán số\n"
+            "- Kiểm tra số nguyên tố\n"
+            "- Chương trình Hello\n\n"
+            "AI model thật sẽ được thêm vào sau."
+        )
+
+    # -----------------------------
+    # GENERAL
+    # -----------------------------
+
+    return (
+        "## PPai\n\n"
+        "Tao đã nhận yêu cầu:\n\n"
+        "> "
+        + message.replace("\n", "\n> ")
+        + "\n\n"
+        "PPai hiện đang chạy ở chế độ AI local "
+        "thử nghiệm."
+    )
 
 
 def main():
 
     try:
+
         raw = sys.stdin.read()
 
         if not raw.strip():
-            print("Không nhận được dữ liệu.")
+
+            print(
+                "Không nhận được dữ liệu."
+            )
+
             return
 
         data = json.loads(raw)
 
-        result = process(data)
+        message = data.get(
+            "message",
+            ""
+        )
 
-        print(result)
+        current_code = data.get(
+            "code",
+            ""
+        )
+
+        if not isinstance(
+            message,
+            str
+        ):
+            message = ""
+
+        if not isinstance(
+            current_code,
+            str
+        ):
+            current_code = ""
+
+        response = build_response(
+            message,
+            current_code
+        )
+
+        print(response)
 
     except json.JSONDecodeError:
-        print("Dữ liệu AI không phải JSON hợp lệ.")
 
-    except Exception as e:
-        print("PPai AI Error:", str(e))
+        print(
+            "PPai AI: dữ liệu JSON không hợp lệ."
+        )
+
+    except Exception as error:
+
+        print(
+            "PPai AI Error: "
+            + str(error)
+        )
 
 
 if __name__ == "__main__":
