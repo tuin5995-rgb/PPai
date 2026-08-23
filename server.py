@@ -6,19 +6,29 @@ import sys
 import tempfile
 
 
-HOST = "127.0.0.1"
+HOST = "0.0.0.0"
 PORT = 8000
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-INDEX_FILE = os.path.join(BASE_DIR, "index.html")
+BASE_DIR = os.path.dirname(
+    os.path.abspath(__file__)
+)
+
+INDEX_FILE = os.path.join(
+    BASE_DIR,
+    "index.html"
+)
 
 
 class PPaiServer(BaseHTTPRequestHandler):
 
     def log_message(self, format, *args):
-        print("[PPai]", format % args)
+        print(
+            "[PPai Server]",
+            format % args
+        )
 
     def send_json(self, data, status=200):
+
         body = json.dumps(
             data,
             ensure_ascii=False
@@ -32,13 +42,23 @@ class PPaiServer(BaseHTTPRequestHandler):
         )
 
         self.send_header(
-            "Content-Length",
-            str(len(body))
+            "Access-Control-Allow-Origin",
+            "*"
         )
 
         self.send_header(
-            "Cache-Control",
-            "no-cache"
+            "Access-Control-Allow-Headers",
+            "Content-Type"
+        )
+
+        self.send_header(
+            "Access-Control-Allow-Methods",
+            "GET, POST, OPTIONS"
+        )
+
+        self.send_header(
+            "Content-Length",
+            str(len(body))
         )
 
         self.end_headers()
@@ -49,8 +69,8 @@ class PPaiServer(BaseHTTPRequestHandler):
 
         try:
 
-            with open(path, "rb") as file:
-                data = file.read()
+            with open(path, "rb") as f:
+                data = f.read()
 
             self.send_response(200)
 
@@ -70,16 +90,21 @@ class PPaiServer(BaseHTTPRequestHandler):
 
         except FileNotFoundError:
 
-            self.send_error(
-                404,
-                "File không tồn tại."
+            self.send_json(
+                {
+                    "error":
+                    "Không tìm thấy file."
+                },
+                404
             )
 
-        except Exception as error:
+        except Exception as e:
 
-            self.send_error(
-                500,
-                str(error)
+            self.send_json(
+                {
+                    "error": str(e)
+                },
+                500
             )
 
     def read_json(self):
@@ -89,14 +114,16 @@ class PPaiServer(BaseHTTPRequestHandler):
             length = int(
                 self.headers.get(
                     "Content-Length",
-                    "0"
+                    0
                 )
             )
 
             if length <= 0:
-                return None
+                return {}
 
-            raw = self.rfile.read(length)
+            raw = self.rfile.read(
+                length
+            )
 
             return json.loads(
                 raw.decode("utf-8")
@@ -106,9 +133,30 @@ class PPaiServer(BaseHTTPRequestHandler):
 
             return None
 
+    def do_OPTIONS(self):
+
+        self.send_response(204)
+
+        self.send_header(
+            "Access-Control-Allow-Origin",
+            "*"
+        )
+
+        self.send_header(
+            "Access-Control-Allow-Headers",
+            "Content-Type"
+        )
+
+        self.send_header(
+            "Access-Control-Allow-Methods",
+            "GET, POST, OPTIONS"
+        )
+
+        self.end_headers()
+
     def do_GET(self):
 
-        if self.path in ["/", "/index.html"]:
+        if self.path == "/":
 
             self.send_file(
                 INDEX_FILE,
@@ -117,21 +165,51 @@ class PPaiServer(BaseHTTPRequestHandler):
 
             return
 
-        if self.path == "/favicon.ico":
+        if self.path == "/api":
 
-            self.send_response(204)
-            self.end_headers()
+            self.send_json(
+                {
+                    "name": "PPai",
+                    "status": "online",
+                    "python": sys.version,
+                    "api": [
+                        "/ai",
+                        "/run"
+                    ]
+                }
+            )
 
             return
 
         self.send_json(
             {
-                "error": "Không tìm thấy trang."
+                "error":
+                "Endpoint không tồn tại."
             },
             404
         )
 
     def do_POST(self):
+
+        if self.path == "/ai":
+
+            data = self.read_json()
+
+            if data is None:
+
+                self.send_json(
+                    {
+                        "error":
+                        "JSON không hợp lệ."
+                    },
+                    400
+                )
+
+                return
+
+            self.ai(data)
+
+            return
 
         if self.path == "/run":
 
@@ -141,7 +219,8 @@ class PPaiServer(BaseHTTPRequestHandler):
 
                 self.send_json(
                     {
-                        "error": "JSON không hợp lệ."
+                        "error":
+                        "JSON không hợp lệ."
                     },
                     400
                 )
@@ -152,149 +231,15 @@ class PPaiServer(BaseHTTPRequestHandler):
 
             return
 
-        if self.path == "/ai":
-
-            data = self.read_json()
-
-            if data is None:
-
-                self.send_json(
-                    {
-                        "error": "JSON không hợp lệ."
-                    },
-                    400
-                )
-
-                return
-
-            self.run_ai(data)
-
-            return
-
         self.send_json(
             {
-                "error": "API không tồn tại."
+                "error":
+                "Endpoint không tồn tại."
             },
             404
         )
 
-    # --------------------------------
-    # RUN PYTHON
-    # --------------------------------
-
-    def run_python(self, data):
-
-        code = data.get("code", "")
-
-        if not isinstance(code, str):
-
-            self.send_json(
-                {
-                    "error": "Code phải là chuỗi."
-                },
-                400
-            )
-
-            return
-
-        if not code.strip():
-
-            self.send_json(
-                {
-                    "output": ""
-                }
-            )
-
-            return
-
-        temp_path = None
-
-        try:
-
-            with tempfile.NamedTemporaryFile(
-                mode="w",
-                suffix=".py",
-                prefix="ppai_",
-                delete=False,
-                encoding="utf-8"
-            ) as file:
-
-                file.write(code)
-                temp_path = file.name
-
-            print("[RUN] Python")
-
-            process = subprocess.Popen(
-                [
-                    sys.executable,
-                    "-u",
-                    temp_path
-                ],
-
-                stdout=subprocess.PIPE,
-
-                stderr=subprocess.STDOUT,
-
-                stdin=subprocess.DEVNULL,
-
-                text=True,
-
-                encoding="utf-8",
-
-                errors="replace"
-            )
-
-            try:
-
-                output, _ = process.communicate(
-                    timeout=10
-                )
-
-            except subprocess.TimeoutExpired:
-
-                process.kill()
-
-                output, _ = process.communicate()
-
-                output += (
-                    "\n\n"
-                    "[PPai] Chương trình đã bị dừng "
-                    "vì chạy quá 10 giây."
-                )
-
-            self.send_json(
-                {
-                    "output": output,
-                    "returncode": process.returncode
-                }
-            )
-
-        except Exception as error:
-
-            self.send_json(
-                {
-                    "error":
-                        "Không thể chạy Python:\n"
-                        + str(error)
-                },
-                500
-            )
-
-        finally:
-
-            if temp_path:
-
-                try:
-                    os.remove(temp_path)
-
-                except Exception:
-                    pass
-
-    # --------------------------------
-    # AI
-    # --------------------------------
-
-    def run_ai(self, data):
+    def ai(self, data):
 
         message = data.get(
             "message",
@@ -306,45 +251,33 @@ class PPaiServer(BaseHTTPRequestHandler):
             ""
         )
 
-        if not isinstance(message, str):
+        if not isinstance(
+            message,
+            str
+        ):
 
-            self.send_json(
-                {
-                    "error":
-                        "Message không hợp lệ."
-                },
-                400
-            )
+            message = ""
 
-            return
-
-        if not isinstance(code, str):
+        if not isinstance(
+            code,
+            str
+        ):
 
             code = ""
-
-        if not message.strip():
-
-            self.send_json(
-                {
-                    "error":
-                        "Tin nhắn trống."
-                },
-                400
-            )
-
-            return
 
         ai_file = os.path.join(
             BASE_DIR,
             "ai.py"
         )
 
-        if not os.path.exists(ai_file):
+        if not os.path.isfile(
+            ai_file
+        ):
 
             self.send_json(
                 {
                     "error":
-                        "Không tìm thấy ai.py."
+                    "Không tìm thấy ai.py."
                 },
                 500
             )
@@ -360,8 +293,6 @@ class PPaiServer(BaseHTTPRequestHandler):
         )
 
         try:
-
-            print("[AI]", message)
 
             process = subprocess.run(
                 [
@@ -384,25 +315,20 @@ class PPaiServer(BaseHTTPRequestHandler):
 
             if process.returncode != 0:
 
-                error = process.stderr.strip()
-
-                if not error:
-                    error = "ai.py trả về lỗi."
-
                 self.send_json(
                     {
-                        "error": error
+                        "error":
+                        process.stderr.strip()
                     },
                     500
                 )
 
                 return
 
-            response = process.stdout.strip()
-
             self.send_json(
                 {
-                    "response": response
+                    "response":
+                    process.stdout.strip()
                 }
             )
 
@@ -411,40 +337,151 @@ class PPaiServer(BaseHTTPRequestHandler):
             self.send_json(
                 {
                     "error":
-                        "PPai AI phản hồi quá lâu."
+                    "AI xử lý quá lâu."
                 },
                 504
             )
 
-        except Exception as error:
+        except Exception as e:
+
+            self.send_json(
+                {
+                    "error": str(e)
+                },
+                500
+            )
+
+    def run_python(self, data):
+
+        code = data.get(
+            "code",
+            ""
+        )
+
+        if not isinstance(
+            code,
+            str
+        ):
 
             self.send_json(
                 {
                     "error":
-                        "Không thể chạy AI:\n"
-                        + str(error)
+                    "Code phải là chuỗi."
+                },
+                400
+            )
+
+            return
+
+        if not code.strip():
+
+            self.send_json(
+                {
+                    "output": ""
+                }
+            )
+
+            return
+
+        temp_file = None
+
+        try:
+
+            with tempfile.NamedTemporaryFile(
+                mode="w",
+                suffix=".py",
+                prefix="ppai_",
+                encoding="utf-8",
+                delete=False
+            ) as f:
+
+                f.write(code)
+
+                temp_file = f.name
+
+            process = subprocess.run(
+                [
+                    sys.executable,
+                    "-u",
+                    temp_file
+                ],
+
+                capture_output=True,
+
+                text=True,
+
+                encoding="utf-8",
+
+                errors="replace",
+
+                timeout=10
+            )
+
+            output = process.stdout
+
+            if process.stderr:
+
+                output += process.stderr
+
+            self.send_json(
+                {
+                    "output": output,
+                    "returncode":
+                    process.returncode
+                }
+            )
+
+        except subprocess.TimeoutExpired:
+
+            self.send_json(
+                {
+                    "error":
+                    "Code chạy quá 10 giây."
+                },
+                408
+            )
+
+        except Exception as e:
+
+            self.send_json(
+                {
+                    "error": str(e)
                 },
                 500
             )
+
+        finally:
+
+            if temp_file:
+
+                try:
+                    os.remove(
+                        temp_file
+                    )
+                except Exception:
+                    pass
 
 
 def main():
 
     print()
     print("=" * 50)
-    print("                 PPai")
-    print("             Python AI IDE")
+    print("                    PPai")
+    print("                Python AI Server")
     print("=" * 50)
     print()
+
     print(
-        f"Server đang chạy tại:"
+        f"Server: http://127.0.0.1:{PORT}"
     )
+
     print(
-        f"http://{HOST}:{PORT}"
+        f"API:    http://127.0.0.1:{PORT}/api"
     )
+
     print()
     print(
-        "Nhấn Ctrl+C để dừng server."
+        "Ctrl+C để dừng server."
     )
     print()
 
@@ -460,13 +497,17 @@ def main():
     except KeyboardInterrupt:
 
         print()
-        print("[PPai] Đang dừng...")
+        print(
+            "[PPai] Đang dừng server..."
+        )
 
     finally:
 
         server.server_close()
 
-        print("[PPai] Server đã dừng.")
+        print(
+            "[PPai] Server đã dừng."
+        )
 
 
 if __name__ == "__main__":
