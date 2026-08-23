@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PPai - Python AI IDE</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            background: #0d1117;
+            color: #e6edf3;
+        }
+
+        button {
+            font: inherit;
+        }
+
+        .app {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* HEADER */
+        .header {
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            background: #238636;
+            color: white;
+            font-weight: bold;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn {
+            border: 1px solid #30363d;
+            background: #21262d;
+            color: #e6edf3;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: #30363d;
+        }
+
+        .run-btn {
+            background: #238636;
+            border-color: #238636;
+        }
+
+        .run-btn:hover {
+            background: #2ea043;
+        }
+
+        .ai-btn {
+            background: #8957e5;
+            border-color: #8957e5;
+        }
+
+        .ai-btn:hover {
+            background: #a371f7;
+        }
+
+        /* MAIN */
+        .main {
+            flex: 1;
+            display: flex;
+            min-height: 0;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 220px;
+            background: #0d1117;
+            border-right: 1px solid #30363d;
+            padding: 14px;
+        }
+
+        .sidebar-title {
+            color: #8b949e;
+            font-size: 12px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .file {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .file:hover {
+            background: #161b22;
+        }
+
+        .file.active {
+            background: #21262d;
+        }
+
+        /* CENTER */
+        .center {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .editor-header {
+            height: 38px;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            color: #8b949e;
+            font-size: 13px;
+        }
+
+        .editor {
+            flex: 1;
+            position: relative;
+            min-height: 0;
+        }
+
+        #code {
+            width: 100%;
+            height: 100%;
+            resize: none;
+            border: none;
+            outline: none;
+            padding: 16px;
+            background: #0d1117;
+            color: #e6edf3;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 15px;
+            line-height: 1.6;
+            tab-size: 4;
+        }
+
+        /* TERMINAL */
+        .terminal {
+            height: 190px;
+            display: flex;
+            flex-direction: column;
+            background: #010409;
+            border-top: 1px solid #30363d;
+        }
+
+        .terminal-header {
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 12px;
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            font-size: 13px;
+        }
+
+        #output {
+            flex: 1;
+            overflow: auto;
+            padding: 12px;
+            white-space: pre-wrap;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 13px;
+            color: #8b949e;
+        }
+
+        /* AI PANEL */
+        .ai-panel {
+            width: 320px;
+            display: flex;
+            flex-direction: column;
+            background: #0d1117;
+            border-left: 1px solid #30363d;
+        }
+
+        .ai-header {
+            height: 38px;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            font-weight: bold;
+        }
+
+        .chat {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        .message {
+            margin-bottom: 12px;
+            padding: 10px;
+            border-radius: 8px;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        .message.ai {
+            background: #161b22;
+            border: 1px solid #30363d;
+        }
+
+        .message.user {
+            background: #21262d;
+        }
+
+        .ai-input {
+            display: flex;
+            gap: 8px;
+            padding: 10px;
+            border-top: 1px solid #30363d;
+        }
+
+        #aiInput {
+            flex: 1;
+            resize: none;
+            height: 42px;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 10px;
+            outline: none;
+            background: #161b22;
+            color: #e6edf3;
+            font-family: Arial, sans-serif;
+        }
+
+        /* MOBILE */
+        @media (max-width: 900px) {
+            .sidebar {
+                display: none;
+            }
+
+            .ai-panel {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">P</div>
+            <span>PPai</span>
+        </div>
+
+        <div class="header-actions">
+            <button class="btn" onclick="clearOutput()">Clear</button>
+            <button class="btn ai-btn" onclick="focusAI()">AI</button>
+            <button class="btn run-btn" onclick="runCode()">▶ Run</button>
+        </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="main">
+
+        <!-- FILES -->
+        <aside class="sidebar">
+            <div class="sidebar-title">Explorer</div>
+
+            <div class="file active">
+                <span>🐍</span>
+                <span>main.py</span>
+            </div>
+        </aside>
+
+        <!-- EDITOR + TERMINAL -->
+        <section class="center">
+
+            <div class="editor-header">
+                main.py
+            </div>
+
+            <div class="editor">
+                <textarea id="code" spellcheck="false">print("Hello from PPai!")
+
+name = input("Tên của bạn: ")
+print("Xin chào,", name)</textarea>
+            </div>
+
+            <div class="terminal">
+
+                <div class="terminal-header">
+                    <span>Terminal</span>
+                    <button class="btn" onclick="clearOutput()">Clear</button>
+                </div>
+
+                <div id="output">PPai Terminal
+Chưa chạy chương trình.</div>
+
+            </div>
+
+        </section>
+
+        <!-- AI -->
+        <aside class="ai-panel">
+
+            <div class="ai-header">
+                PPai AI
+            </div>
+
+            <div class="chat" id="chat">
+
+                <div class="message ai">
+                    Xin chào. Tôi là PPai AI.<br><br>
+                    Tôi có thể giúp viết, giải thích và sửa code Python.
+                </div>
+
+            </div>
+
+            <div class="ai-input">
+
+                <textarea
+                    id="aiInput"
+                    placeholder="Hỏi PPai AI..."
+                    onkeydown="aiKeydown(event)"
+                ></textarea>
+
+                <button class="btn ai-btn" onclick="sendAI()">
+                    Gửi
+                </button>
+
+            </div>
+
+        </aside>
+
+    </main>
+
+</div>
+
+<script>
+    const code = document.getElementById("code");
+    const output = document.getElementById("output");
+    const chat = document.getElementById("chat");
+    const aiInput = document.getElementById("aiInput");
+
+    /* TAB trong editor */
+    code.addEventListener("keydown", function(event) {
+        if (event.key === "Tab") {
+            event.preventDefault();
+
+            const start = code.selectionStart;
+            const end = code.selectionEnd;
+
+            code.value =
+                code.value.substring(0, start) +
+                "    " +
+                code.value.substring(end);
+
+            code.selectionStart = code.selectionEnd = start + 4;
+        }
+
+        /* Ctrl + Enter = Run */
+        if (event.ctrlKey && event.key === "Enter") {
+            event.preventDefault();
+            runCode();
+        }
+    });
+
+    /* Chạy Python */
+    async function runCode() {
+        const source = code.value;
+
+        output.textContent = "PPai > Đang chạy...\n";
+
+        try {
+            const response = await fetch("/run", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    code: source
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.output !== undefined) {
+                output.textContent = data.output;
+            } else {
+                output.textContent = data.error || "Không có kết quả.";
+            }
+
+        } catch (error) {
+            output.textContent =
+                "Không thể kết nối tới server.py\n\n" +
+                error;
+        }
+    }
+
+    /* Xóa terminal */
+    function clearOutput() {
+        output.textContent = "";
+    }
+
+    /* Focus AI */
+    function focusAI() {
+        aiInput.focus();
+    }
+
+    /* Enter gửi AI, Shift+Enter xuống dòng */
+    function aiKeydown(event) {
+        if (event.key === "Enter" && !event.shiftKey) {
+            event.preventDefault();
+            sendAI();
+        }
+    }
+
+    /* Gửi câu hỏi cho AI */
+    async function sendAI() {
+        const text = aiInput.value.trim();
+
+        if (!text) {
+            return;
+        }
+
+        addMessage(text, "user");
+
+        aiInput.value = "";
+
+        addMessage("Đang suy nghĩ...", "ai");
+
+        try {
+            const response = await fetch("/ai", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    message: text,
+                    code: code.value
+                })
+            });
+
+            const data = await response.json();
+
+            const messages = document.querySelectorAll(".message.ai");
+            const last = messages[messages.length - 1];
+
+            if (last) {
+                last.textContent =
+                    data.response || data.error || "AI không trả lời.";
+            }
+
+        } catch (error) {
+            const messages = document.querySelectorAll(".message.ai");
+            const last = messages[messages.length - 1];
+
+            if (last) {
+                last.textContent =
+                    "Không thể kết nối tới PPai AI.";
+            }
+        }
+
+        chat.scrollTop = chat.scrollHeight;
+    }
+
+    function addMessage(text, type) {
+        const message = document.createElement("div");
+
+        message.className = "message " + type;
+        message.textContent = text;
+
+        chat.appendChild(message);
+        chat.scrollTop = chat.scrollHeight;
+    }
+</script>
+
+</body>
+</html>
