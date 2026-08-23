@@ -1,26 +1,36 @@
 import sys
 import json
 import re
+import ast
+import traceback
 
 
 APP_NAME = "PPai"
 
 
-def clean_message(message):
-    return message.strip()
+# =========================================================
+# UTILITY
+# =========================================================
+
+def clean(text):
+    if not isinstance(text, str):
+        return ""
+    return text.strip()
 
 
-def extract_code(message):
+def extract_code(text):
     """
-    Tìm code Python nằm trong markdown:
+    Lấy code từ:
     ```python
-    ...
+    print("Hello")
     ```
     """
 
+    pattern = r"```(?:python|py)?\s*([\s\S]*?)```"
+
     match = re.search(
-        r"```(?:python|py)?\s*([\s\S]*?)```",
-        message,
+        pattern,
+        text,
         re.IGNORECASE
     )
 
@@ -30,105 +40,182 @@ def extract_code(message):
     return None
 
 
+def detect_python(code):
+    try:
+        ast.parse(code)
+        return True, None
+    except SyntaxError as error:
+        return False, error
+
+
+# =========================================================
+# CODE ANALYSIS
+# =========================================================
+
 def explain_code(code):
+
     if not code.strip():
         return "Không có code để giải thích."
 
-    lines = code.splitlines()
+    try:
+        tree = ast.parse(code)
+    except SyntaxError as error:
+        return (
+            "Code đang có lỗi cú pháp.\n\n"
+            f"Dòng: {error.lineno}\n"
+            f"Vấn đề: {error.msg}"
+        )
+
     result = []
 
-    for index, line in enumerate(lines, 1):
+    result.append(
+        "## Phân tích Python"
+    )
 
-        text = line.strip()
+    result.append("")
 
-        if not text:
-            continue
+    functions = []
+    classes = []
+    imports = []
+    variables = []
 
-        if text.startswith("#"):
-            result.append(
-                f"Dòng {index}: chú thích."
+    for node in ast.walk(tree):
+
+        if isinstance(node, ast.FunctionDef):
+            functions.append(
+                node.name
             )
 
-        elif text.startswith("print("):
-            result.append(
-                f"Dòng {index}: in dữ liệu ra màn hình."
+        elif isinstance(node, ast.AsyncFunctionDef):
+            functions.append(
+                node.name
             )
 
-        elif text.startswith("input("):
-            result.append(
-                f"Dòng {index}: nhận dữ liệu từ người dùng."
+        elif isinstance(node, ast.ClassDef):
+            classes.append(
+                node.name
             )
 
-        elif text.startswith("import "):
-            result.append(
-                f"Dòng {index}: nhập một module/thư viện."
+        elif isinstance(node, ast.Import):
+            for item in node.names:
+                imports.append(
+                    item.name
+                )
+
+        elif isinstance(node, ast.ImportFrom):
+
+            if node.module:
+                imports.append(
+                    node.module
+                )
+
+        elif isinstance(node, ast.Assign):
+
+            for target in node.targets:
+
+                if isinstance(
+                    target,
+                    ast.Name
+                ):
+                    variables.append(
+                        target.id
+                    )
+
+    if imports:
+
+        result.append(
+            "**Thư viện:** "
+            + ", ".join(
+                sorted(set(imports))
             )
+        )
 
-        elif text.startswith("from "):
-            result.append(
-                f"Dòng {index}: nhập thành phần từ một module."
+    if functions:
+
+        result.append(
+            "**Hàm:** "
+            + ", ".join(
+                sorted(set(functions))
             )
+        )
 
-        elif text.startswith("def "):
-            name = text[4:].split("(")[0]
+    if classes:
 
-            result.append(
-                f"Dòng {index}: định nghĩa hàm `{name}`."
+        result.append(
+            "**Class:** "
+            + ", ".join(
+                sorted(set(classes))
             )
+        )
 
-        elif text.startswith("class "):
-            name = text[6:].split("(")[0].split(":")[0]
+    if variables:
 
-            result.append(
-                f"Dòng {index}: định nghĩa class `{name}`."
+        result.append(
+            "**Biến:** "
+            + ", ".join(
+                sorted(set(variables))
             )
+        )
 
-        elif text.startswith("if "):
-            result.append(
-                f"Dòng {index}: kiểm tra điều kiện."
-            )
+    result.append("")
 
-        elif text.startswith("elif "):
-            result.append(
-                f"Dòng {index}: kiểm tra điều kiện khác."
-            )
+    result.append(
+        "### Code"
+    )
 
-        elif text.startswith("else:"):
-            result.append(
-                f"Dòng {index}: nhánh còn lại của điều kiện."
-            )
+    result.append("")
 
-        elif text.startswith("for "):
-            result.append(
-                f"Dòng {index}: tạo vòng lặp `for`."
-            )
-
-        elif text.startswith("while "):
-            result.append(
-                f"Dòng {index}: tạo vòng lặp `while`."
-            )
-
-        elif text.startswith("return "):
-            result.append(
-                f"Dòng {index}: trả về một giá trị từ hàm."
-            )
-
-        elif "=" in text and "==" not in text:
-
-            result.append(
-                f"Dòng {index}: gán giá trị cho biến."
-            )
-
-        else:
-
-            result.append(
-                f"Dòng {index}: thực hiện `{text}`."
-            )
+    result.append(
+        "```python\n"
+        + code
+        + "\n```"
+    )
 
     return "\n".join(result)
 
 
-def generate_calculator():
+# =========================================================
+# SYNTAX CHECK
+# =========================================================
+
+def check_code(code):
+
+    if not code.strip():
+
+        return (
+            "Không có code để kiểm tra."
+        )
+
+    try:
+
+        ast.parse(code)
+
+        return (
+            "Không phát hiện lỗi cú pháp "
+            "Python cơ bản."
+        )
+
+    except SyntaxError as error:
+
+        line = error.lineno or "?"
+
+        column = error.offset or "?"
+
+        message = error.msg or "SyntaxError"
+
+        return (
+            "## Lỗi Python\n\n"
+            f"- Dòng: `{line}`\n"
+            f"- Cột: `{column}`\n"
+            f"- Lỗi: `{message}`"
+        )
+
+
+# =========================================================
+# CODE GENERATORS
+# =========================================================
+
+def code_calculator():
 
     return '''a = float(input("Số thứ nhất: "))
 b = float(input("Số thứ hai: "))
@@ -143,7 +230,15 @@ else:
     print("Không thể chia cho 0.")'''
 
 
-def generate_fibonacci():
+def code_hello():
+
+    return '''name = input("Tên của bạn: ")
+
+print("Xin chào,", name)
+print("Chào mừng đến với PPai!")'''
+
+
+def code_fibonacci():
 
     return '''n = int(input("Nhập số lượng phần tử: "))
 
@@ -157,39 +252,7 @@ for _ in range(n):
 print()'''
 
 
-def generate_guess_game():
-
-    return '''import random
-
-number = random.randint(1, 100)
-
-print("Tao đã chọn một số từ 1 đến 100.")
-
-while True:
-    try:
-        guess = int(input("Đoán số: "))
-    except ValueError:
-        print("Hãy nhập một số.")
-        continue
-
-    if guess < number:
-        print("Lớn hơn.")
-    elif guess > number:
-        print("Nhỏ hơn.")
-    else:
-        print("Đúng rồi!")
-        break'''
-
-
-def generate_hello():
-
-    return '''name = input("Tên của bạn: ")
-
-print("Xin chào,", name)
-print("Chào mừng đến với PPai!")'''
-
-
-def generate_prime():
+def code_prime():
 
     return '''n = int(input("Nhập số: "))
 
@@ -209,6 +272,61 @@ else:
         print("Không phải số nguyên tố.")'''
 
 
+def code_guess():
+
+    return '''import random
+
+number = random.randint(1, 100)
+
+print("Tao đã chọn một số từ 1 đến 100.")
+
+while True:
+
+    try:
+        guess = int(input("Đoán số: "))
+
+    except ValueError:
+        print("Hãy nhập số.")
+        continue
+
+    if guess < number:
+        print("Lớn hơn.")
+
+    elif guess > number:
+        print("Nhỏ hơn.")
+
+    else:
+        print("Chính xác!")
+        break'''
+
+
+def code_factorial():
+
+    return '''n = int(input("Nhập n: "))
+
+result = 1
+
+for i in range(1, n + 1):
+    result *= i
+
+print("Giai thừa:", result)'''
+
+
+def code_password():
+
+    return '''password = "123456"
+
+while True:
+
+    value = input("Mật khẩu: ")
+
+    if value == password:
+        print("Đăng nhập thành công!")
+        break
+
+    print("Sai mật khẩu.")'''
+
+
 def generate_code(message):
 
     text = message.lower()
@@ -218,72 +336,97 @@ def generate_code(message):
         or "calculator" in text
         or "tính toán" in text
     ):
-        return generate_calculator()
+        return code_calculator()
 
     if "fibonacci" in text:
-        return generate_fibonacci()
-
-    if (
-        "đoán số" in text
-        or "guess game" in text
-    ):
-        return generate_guess_game()
-
-    if (
-        "hello" in text
-        or "xin chào" in text
-        or "chào" in text
-    ):
-        return generate_hello()
+        return code_fibonacci()
 
     if (
         "số nguyên tố" in text
         or "prime" in text
     ):
-        return generate_prime()
+        return code_prime()
+
+    if (
+        "đoán số" in text
+        or "guess game" in text
+    ):
+        return code_guess()
+
+    if (
+        "giai thừa" in text
+        or "factorial" in text
+    ):
+        return code_factorial()
+
+    if (
+        "mật khẩu" in text
+        or "password" in text
+    ):
+        return code_password()
+
+    if (
+        "hello" in text
+        or "xin chào" in text
+    ):
+        return code_hello()
 
     return None
 
 
-def is_explain_request(message):
+# =========================================================
+# INTENT DETECTION
+# =========================================================
 
-    text = message.lower()
+def wants_explanation(text):
 
     words = [
         "giải thích",
         "giải nghĩa",
         "explain",
-        "giải thích code"
+        "phân tích code"
     ]
 
     return any(
-        word in text
+        word in text.lower()
         for word in words
     )
 
 
-def is_fix_request(message):
-
-    text = message.lower()
+def wants_fix(text):
 
     words = [
         "sửa lỗi",
         "sửa code",
-        "fix",
         "debug",
-        "lỗi code",
-        "sửa giúp"
+        "fix code",
+        "fix lỗi",
+        "lỗi code"
     ]
 
     return any(
-        word in text
+        word in text.lower()
         for word in words
     )
 
 
-def is_code_request(message):
+def wants_check(text):
 
-    text = message.lower()
+    words = [
+        "kiểm tra code",
+        "check code",
+        "kiểm tra lỗi",
+        "có lỗi không",
+        "syntax"
+    ]
+
+    return any(
+        word in text.lower()
+        for word in words
+    )
+
+
+def wants_code(text):
 
     words = [
         "viết code",
@@ -291,102 +434,186 @@ def is_code_request(message):
         "viết chương trình",
         "tạo chương trình",
         "code python",
-        "python",
-        "lập trình"
+        "lập trình",
+        "python"
     ]
 
     return any(
-        word in text
+        word in text.lower()
         for word in words
     )
 
 
-def build_response(message, current_code):
+# =========================================================
+# FIX SIMPLE PYTHON
+# =========================================================
 
-    message = clean_message(message)
+def try_fix(code):
+
+    if not code.strip():
+        return None
+
+    fixed = code
+
+    # Một số lỗi cực cơ bản
+
+    fixed = fixed.replace(
+        "Print(",
+        "print("
+    )
+
+    fixed = fixed.replace(
+        "Input(",
+        "input("
+    )
+
+    fixed = fixed.replace(
+        "Truee",
+        "True"
+    )
+
+    fixed = fixed.replace(
+        "Falsee",
+        "False"
+    )
+
+    fixed = fixed.replace(
+        "Nonee",
+        "None"
+    )
+
+    try:
+
+        ast.parse(fixed)
+
+        if fixed != code:
+            return fixed
+
+    except SyntaxError:
+        pass
+
+    return None
+
+
+# =========================================================
+# RESPONSE
+# =========================================================
+
+def response(message, current_code):
+
+    message = clean(message)
+    current_code = clean(current_code)
 
     if not message:
-        return "Mày chưa nhập yêu cầu."
 
-    # -----------------------------
+        return (
+            "Mày chưa nhập yêu cầu."
+        )
+
+    # -------------------------
     # EXPLAIN
-    # -----------------------------
+    # -------------------------
 
-    if is_explain_request(message):
+    if wants_explanation(message):
 
-        if current_code.strip():
+        code = current_code
 
-            explanation = explain_code(
-                current_code
-            )
-
-            return (
-                "## Giải thích code\n\n"
-                + explanation
-            )
-
-        extracted = extract_code(message)
-
-        if extracted:
-
-            explanation = explain_code(
-                extracted
-            )
-
-            return (
-                "## Giải thích code\n\n"
-                + explanation
-            )
-
-        return (
-            "Mày chưa đưa code cho tao giải thích."
+        extracted = extract_code(
+            message
         )
 
-    # -----------------------------
+        if extracted:
+            code = extracted
+
+        if not code:
+
+            return (
+                "Mày chưa đưa code để tao "
+                "phân tích."
+            )
+
+        return explain_code(code)
+
+    # -------------------------
+    # CHECK
+    # -------------------------
+
+    if wants_check(message):
+
+        code = current_code
+
+        extracted = extract_code(
+            message
+        )
+
+        if extracted:
+            code = extracted
+
+        return check_code(code)
+
+    # -------------------------
     # FIX
-    # -----------------------------
+    # -------------------------
 
-    if is_fix_request(message):
+    if wants_fix(message):
 
-        if current_code.strip():
+        code = current_code
 
-            return (
-                "## Phân tích code\n\n"
-                "Tao đã nhận đoạn code hiện tại "
-                "trong editor.\n\n"
-                "Code:\n\n"
-                "```python\n"
-                + current_code
-                + "\n```\n\n"
-                "Bản PPai local hiện tại chưa có "
-                "model thật để phân tích lỗi tự động. "
-                "Phần này sẽ được kết nối với AI model "
-                "ở phiên bản sau."
-            )
-
-        extracted = extract_code(message)
+        extracted = extract_code(
+            message
+        )
 
         if extracted:
+            code = extracted
+
+        if not code:
 
             return (
-                "Tao đã nhận code:\n\n"
+                "Đưa code cần sửa vào editor "
+                "hoặc gửi trong tin nhắn."
+            )
+
+        valid, error = detect_python(
+            code
+        )
+
+        if valid:
+
+            return (
+                "Tao không thấy lỗi cú pháp "
+                "Python cơ bản.\n\n"
+                "Nếu chương trình vẫn lỗi, "
+                "có thể đó là lỗi logic hoặc "
+                "lỗi khi chạy."
+            )
+
+        fixed = try_fix(code)
+
+        if fixed:
+
+            return (
+                "## Tao tìm thấy lỗi\n\n"
+                "Bản sửa:\n\n"
                 "```python\n"
-                + extracted
-                + "\n```\n\n"
-                "Hiện tại PPai local chưa có model "
-                "thật để debug tự động."
+                + fixed
+                + "\n```"
             )
 
         return (
-            "Hãy đưa code cần sửa vào editor "
-            "hoặc trong tin nhắn."
+            "## Lỗi cú pháp\n\n"
+            f"Dòng `{error.lineno}`: "
+            f"{error.msg}\n\n"
+            "Code hiện tại:\n\n"
+            "```python\n"
+            + code
+            + "\n```"
         )
 
-    # -----------------------------
-    # GENERATE CODE
-    # -----------------------------
+    # -------------------------
+    # GENERATE
+    # -------------------------
 
-    if is_code_request(message):
+    if wants_code(message):
 
         generated = generate_code(
             message
@@ -395,40 +622,42 @@ def build_response(message, current_code):
         if generated:
 
             return (
-                "## Code Python\n\n"
+                "## Python\n\n"
                 "```python\n"
                 + generated
-                + "\n```\n\n"
-                "Mày có thể copy hoặc chạy trực tiếp "
-                "đoạn code này."
+                + "\n```"
             )
 
         return (
-            "Tao hiểu là mày muốn viết Python.\n\n"
-            "Hiện tại PPai local có thể tạo một số "
-            "chương trình mẫu như:\n\n"
+            "Tao hiểu là mày muốn code Python.\n\n"
+            "PPai hiện hỗ trợ tạo mẫu cho:\n\n"
             "- Máy tính\n"
             "- Fibonacci\n"
+            "- Số nguyên tố\n"
             "- Game đoán số\n"
-            "- Kiểm tra số nguyên tố\n"
-            "- Chương trình Hello\n\n"
-            "AI model thật sẽ được thêm vào sau."
+            "- Giai thừa\n"
+            "- Mật khẩu\n"
+            "- Hello World"
         )
 
-    # -----------------------------
+    # -------------------------
     # GENERAL
-    # -----------------------------
+    # -------------------------
 
     return (
         "## PPai\n\n"
-        "Tao đã nhận yêu cầu:\n\n"
-        "> "
-        + message.replace("\n", "\n> ")
+        "Đã nhận:\n\n"
+        + message
         + "\n\n"
-        "PPai hiện đang chạy ở chế độ AI local "
-        "thử nghiệm."
+        "Đây là bản AI local của PPai. "
+        "Nó đang xử lý bằng Python mà không "
+        "cần dịch vụ AI bên ngoài."
     )
 
+
+# =========================================================
+# MAIN
+# =========================================================
 
 def main():
 
@@ -439,7 +668,7 @@ def main():
         if not raw.strip():
 
             print(
-                "Không nhận được dữ liệu."
+                "PPai: Không nhận được dữ liệu."
             )
 
             return
@@ -451,41 +680,33 @@ def main():
             ""
         )
 
-        current_code = data.get(
+        code = data.get(
             "code",
             ""
         )
 
-        if not isinstance(
+        result = response(
             message,
-            str
-        ):
-            message = ""
-
-        if not isinstance(
-            current_code,
-            str
-        ):
-            current_code = ""
-
-        response = build_response(
-            message,
-            current_code
+            code
         )
 
-        print(response)
+        print(result)
 
     except json.JSONDecodeError:
 
         print(
-            "PPai AI: dữ liệu JSON không hợp lệ."
+            "PPai: JSON không hợp lệ."
         )
 
     except Exception as error:
 
         print(
-            "PPai AI Error: "
-            + str(error)
+            "PPai Error:",
+            str(error)
+        )
+
+        traceback.print_exc(
+            file=sys.stderr
         )
 
 
