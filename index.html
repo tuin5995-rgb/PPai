@@ -3,280 +3,630 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PPai - Python AI IDE</title>
+    <title>PPai</title>
 
     <style>
         * {
             box-sizing: border-box;
         }
 
-        html, body {
-            margin: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            font-family: Arial, sans-serif;
-            background: #0d1117;
-            color: #e6edf3;
+        :root {
+            --bg: #212121;
+            --sidebar: #171717;
+            --sidebar-hover: #2a2a2a;
+            --panel: #212121;
+            --input: #2f2f2f;
+            --border: #3a3a3a;
+            --text: #ececec;
+            --muted: #a0a0a0;
+            --code: #171717;
+            --accent: #10a37f;
         }
 
-        button {
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            background: var(--bg);
+            color: var(--text);
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Roboto,
+                Arial,
+                sans-serif;
+        }
+
+        button,
+        textarea {
             font: inherit;
         }
 
+        button {
+            border: 0;
+        }
+
+        /* APP */
+
         .app {
             display: flex;
-            flex-direction: column;
             width: 100%;
             height: 100%;
         }
 
-        /* HEADER */
-        .header {
-            height: 56px;
+        /* SIDEBAR */
+
+        .sidebar {
+            width: 260px;
+            height: 100%;
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 16px;
-            background: #161b22;
-            border-bottom: 1px solid #30363d;
+            flex-direction: column;
+            background: var(--sidebar);
+            padding: 8px;
+            transition: width 0.2s ease;
+            flex-shrink: 0;
         }
 
-        .logo {
+        .sidebar.hidden {
+            width: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .brand {
+            height: 48px;
             display: flex;
             align-items: center;
             gap: 10px;
-            font-size: 20px;
-            font-weight: bold;
+            padding: 0 10px;
+            margin-bottom: 4px;
         }
 
-        .logo-icon {
-            width: 32px;
-            height: 32px;
+        .brand-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--accent);
+            color: white;
+            font-weight: 800;
+            font-size: 16px;
+        }
+
+        .brand-name {
+            font-size: 17px;
+            font-weight: 600;
+        }
+
+        .new-chat {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 12px;
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text);
+            cursor: pointer;
+            text-align: left;
+            margin-bottom: 14px;
+        }
+
+        .new-chat:hover {
+            background: var(--sidebar-hover);
+        }
+
+        .new-chat-icon {
+            font-size: 20px;
+            font-weight: 300;
+        }
+
+        .history-title {
+            padding: 8px 12px;
+            color: #777;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .history {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 10px 12px;
+            border-radius: 7px;
+            color: #d0d0d0;
+            background: transparent;
+            cursor: pointer;
+            text-align: left;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .history-item:hover {
+            background: var(--sidebar-hover);
+        }
+
+        .history-item.active {
+            background: #2a2a2a;
+        }
+
+        .sidebar-bottom {
+            border-top: 1px solid #292929;
+            padding-top: 8px;
+        }
+
+        .account {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .account:hover {
+            background: var(--sidebar-hover);
+        }
+
+        .avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #555;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .account-text {
+            min-width: 0;
+        }
+
+        .account-name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .account-sub {
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        /* MAIN */
+
+        .main {
+            flex: 1;
+            min-width: 0;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* TOPBAR */
+
+        .topbar {
+            height: 56px;
+            display: flex;
+            align-items: center;
+            padding: 0 14px;
+            flex-shrink: 0;
+        }
+
+        .menu-button {
+            width: 38px;
+            height: 38px;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 8px;
-            background: #238636;
-            color: white;
-            font-weight: bold;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .btn {
-            border: 1px solid #30363d;
-            background: #21262d;
-            color: #e6edf3;
-            padding: 8px 14px;
-            border-radius: 6px;
+            background: transparent;
+            color: var(--text);
             cursor: pointer;
+            font-size: 21px;
         }
 
-        .btn:hover {
-            background: #30363d;
+        .menu-button:hover {
+            background: #2a2a2a;
         }
 
-        .run-btn {
-            background: #238636;
-            border-color: #238636;
+        .mobile-title {
+            display: none;
+            margin-left: 8px;
+            font-weight: 600;
         }
 
-        .run-btn:hover {
-            background: #2ea043;
-        }
+        /* CHAT */
 
-        .ai-btn {
-            background: #8957e5;
-            border-color: #8957e5;
-        }
-
-        .ai-btn:hover {
-            background: #a371f7;
-        }
-
-        /* MAIN */
-        .main {
+        .chat {
             flex: 1;
-            display: flex;
             min-height: 0;
+            overflow-y: auto;
+            scroll-behavior: smooth;
         }
 
-        /* SIDEBAR */
-        .sidebar {
-            width: 220px;
-            background: #0d1117;
-            border-right: 1px solid #30363d;
-            padding: 14px;
+        .chat-inner {
+            width: min(820px, calc(100% - 32px));
+            margin: 0 auto;
+            padding: 28px 0 170px;
         }
 
-        .sidebar-title {
-            color: #8b949e;
-            font-size: 12px;
-            text-transform: uppercase;
-            margin-bottom: 10px;
-        }
-
-        .file {
+        .welcome {
+            min-height: calc(100vh - 240px);
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 8px;
-            border-radius: 6px;
+            justify-content: center;
+            flex-direction: column;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .welcome-logo {
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--accent);
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 18px;
+        }
+
+        .welcome h1 {
+            font-size: 30px;
+            margin: 0 0 10px;
+            font-weight: 600;
+        }
+
+        .welcome p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 15px;
+        }
+
+        .suggestions {
+            width: min(700px, 100%);
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 28px;
+        }
+
+        .suggestion {
+            padding: 14px;
+            text-align: left;
+            color: #ddd;
+            background: #2a2a2a;
+            border: 1px solid #343434;
+            border-radius: 10px;
             cursor: pointer;
         }
 
-        .file:hover {
-            background: #161b22;
+        .suggestion:hover {
+            background: #333;
         }
 
-        .file.active {
-            background: #21262d;
+        .suggestion-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
         }
 
-        /* CENTER */
-        .center {
-            flex: 1;
+        .suggestion-text {
+            color: #999;
+            font-size: 12px;
+        }
+
+        /* MESSAGE */
+
+        .message {
             display: flex;
-            flex-direction: column;
-            min-width: 0;
+            gap: 16px;
+            margin-bottom: 30px;
         }
 
-        .editor-header {
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            flex-shrink: 0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .message.user .message-avatar {
+            background: #555;
+        }
+
+        .message.ai .message-avatar {
+            background: var(--accent);
+        }
+
+        .message-content {
+            min-width: 0;
+            flex: 1;
+            line-height: 1.65;
+            font-size: 15px;
+        }
+
+        .message-content p {
+            margin: 0 0 12px;
+        }
+
+        .message-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* CODE */
+
+        .code-wrapper {
+            margin: 14px 0;
+            border: 1px solid #3b3b3b;
+            border-radius: 9px;
+            overflow: hidden;
+            background: var(--code);
+        }
+
+        .code-header {
             height: 38px;
             display: flex;
             align-items: center;
-            padding: 0 12px;
-            background: #161b22;
-            border-bottom: 1px solid #30363d;
-            color: #8b949e;
-            font-size: 13px;
+            justify-content: space-between;
+            padding: 0 10px 0 14px;
+            background: #2b2b2b;
+            color: #aaa;
+            font-size: 12px;
         }
 
-        .editor {
-            flex: 1;
-            position: relative;
-            min-height: 0;
-        }
-
-        #code {
-            width: 100%;
-            height: 100%;
-            resize: none;
-            border: none;
-            outline: none;
-            padding: 16px;
-            background: #0d1117;
-            color: #e6edf3;
-            font-family: Consolas, "Courier New", monospace;
-            font-size: 15px;
-            line-height: 1.6;
-            tab-size: 4;
-        }
-
-        /* TERMINAL */
-        .terminal {
-            height: 190px;
+        .code-actions {
             display: flex;
-            flex-direction: column;
-            background: #010409;
-            border-top: 1px solid #30363d;
+            gap: 6px;
         }
 
-        .terminal-header {
+        .code-button {
+            padding: 5px 9px;
+            border-radius: 5px;
+            background: #3a3a3a;
+            color: #ddd;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        .code-button:hover {
+            background: #4a4a4a;
+        }
+
+        pre {
+            margin: 0;
+            padding: 15px;
+            overflow-x: auto;
+            color: #ddd;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        /* INPUT AREA */
+
+        .input-area {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 20px 16px 24px;
+            background: linear-gradient(
+                transparent,
+                var(--bg) 25%
+            );
+        }
+
+        .input-container {
+            width: min(820px, 100%);
+            margin: 0 auto;
+        }
+
+        .input-box {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            padding: 10px 10px 10px 15px;
+            background: var(--input);
+            border: 1px solid #444;
+            border-radius: 16px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
+        }
+
+        .input-box:focus-within {
+            border-color: #555;
+        }
+
+        #messageInput {
+            flex: 1;
+            min-height: 26px;
+            max-height: 180px;
+            resize: none;
+            overflow-y: auto;
+            border: 0;
+            outline: 0;
+            background: transparent;
+            color: var(--text);
+            line-height: 1.5;
+            font-size: 15px;
+            padding: 5px 0;
+        }
+
+        #messageInput::placeholder {
+            color: #999;
+        }
+
+        .input-tools {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .tool-button {
+            width: 34px;
             height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 9px;
+            background: transparent;
+            color: #aaa;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .tool-button:hover {
+            background: #444;
+            color: white;
+        }
+
+        .send-button {
+            width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 9px;
+            background: #555;
+            color: white;
+            cursor: pointer;
+            font-size: 17px;
+        }
+
+        .send-button.active {
+            background: white;
+            color: black;
+        }
+
+        .send-button:hover {
+            opacity: 0.9;
+        }
+
+        .disclaimer {
+            text-align: center;
+            color: #777;
+            font-size: 11px;
+            margin-top: 9px;
+        }
+
+        /* RUN CODE */
+
+        .run-panel {
+            display: none;
+            margin-top: 12px;
+            border: 1px solid #3b3b3b;
+            border-radius: 9px;
+            overflow: hidden;
+            background: #151515;
+        }
+
+        .run-panel.show {
+            display: block;
+        }
+
+        .run-header {
+            height: 38px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 0 12px;
-            background: #161b22;
-            border-bottom: 1px solid #30363d;
-            font-size: 13px;
+            background: #292929;
+            font-size: 12px;
         }
 
-        #output {
-            flex: 1;
+        .run-output {
+            max-height: 250px;
             overflow: auto;
             padding: 12px;
             white-space: pre-wrap;
-            font-family: Consolas, "Courier New", monospace;
-            font-size: 13px;
-            color: #8b949e;
+            font-family: Consolas, monospace;
+            font-size: 12px;
+            color: #bbb;
         }
 
-        /* AI PANEL */
-        .ai-panel {
-            width: 320px;
-            display: flex;
-            flex-direction: column;
-            background: #0d1117;
-            border-left: 1px solid #30363d;
+        /* SCROLLBAR */
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
         }
 
-        .ai-header {
-            height: 38px;
-            display: flex;
-            align-items: center;
-            padding: 0 12px;
-            background: #161b22;
-            border-bottom: 1px solid #30363d;
-            font-weight: bold;
+        ::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 10px;
         }
 
-        .chat {
-            flex: 1;
-            overflow-y: auto;
-            padding: 12px;
-        }
-
-        .message {
-            margin-bottom: 12px;
-            padding: 10px;
-            border-radius: 8px;
-            line-height: 1.5;
-            font-size: 14px;
-        }
-
-        .message.ai {
-            background: #161b22;
-            border: 1px solid #30363d;
-        }
-
-        .message.user {
-            background: #21262d;
-        }
-
-        .ai-input {
-            display: flex;
-            gap: 8px;
-            padding: 10px;
-            border-top: 1px solid #30363d;
-        }
-
-        #aiInput {
-            flex: 1;
-            resize: none;
-            height: 42px;
-            border: 1px solid #30363d;
-            border-radius: 6px;
-            padding: 10px;
-            outline: none;
-            background: #161b22;
-            color: #e6edf3;
-            font-family: Arial, sans-serif;
+        ::-webkit-scrollbar-track {
+            background: transparent;
         }
 
         /* MOBILE */
-        @media (max-width: 900px) {
+
+        @media (max-width: 700px) {
+
             .sidebar {
-                display: none;
+                position: fixed;
+                z-index: 20;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                box-shadow: 8px 0 30px rgba(0, 0, 0, 0.35);
             }
 
-            .ai-panel {
-                display: none;
+            .sidebar.hidden {
+                width: 0;
+            }
+
+            .mobile-title {
+                display: block;
+            }
+
+            .chat-inner {
+                width: calc(100% - 24px);
+                padding-top: 15px;
+            }
+
+            .suggestions {
+                grid-template-columns: 1fr;
+            }
+
+            .welcome h1 {
+                font-size: 25px;
+            }
+
+            .message {
+                gap: 10px;
+            }
+
+            .message-content {
+                font-size: 14px;
+            }
+
+            .input-area {
+                padding-left: 10px;
+                padding-right: 10px;
             }
         }
     </style>
@@ -286,191 +636,385 @@
 
 <div class="app">
 
-    <!-- HEADER -->
-    <header class="header">
-        <div class="logo">
-            <div class="logo-icon">P</div>
-            <span>PPai</span>
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="brand">
+            <div class="brand-icon">P</div>
+            <div class="brand-name">PPai</div>
         </div>
 
-        <div class="header-actions">
-            <button class="btn" onclick="clearOutput()">Clear</button>
-            <button class="btn ai-btn" onclick="focusAI()">AI</button>
-            <button class="btn run-btn" onclick="runCode()">▶ Run</button>
+        <button class="new-chat" onclick="newChat()">
+            <span class="new-chat-icon">＋</span>
+            <span>Chat mới</span>
+        </button>
+
+        <div class="history-title">
+            Lịch sử
         </div>
-    </header>
 
-    <!-- MAIN -->
-    <main class="main">
+        <div class="history" id="history">
 
-        <!-- FILES -->
-        <aside class="sidebar">
-            <div class="sidebar-title">Explorer</div>
+            <button class="history-item active">
+                <span>💬</span>
+                <span>Cuộc trò chuyện mới</span>
+            </button>
 
-            <div class="file active">
-                <span>🐍</span>
-                <span>main.py</span>
-            </div>
-        </aside>
+        </div>
 
-        <!-- EDITOR + TERMINAL -->
-        <section class="center">
+        <div class="sidebar-bottom">
 
-            <div class="editor-header">
-                main.py
-            </div>
+            <div class="account">
 
-            <div class="editor">
-                <textarea id="code" spellcheck="false">print("Hello from PPai!")
-
-name = input("Tên của bạn: ")
-print("Xin chào,", name)</textarea>
-            </div>
-
-            <div class="terminal">
-
-                <div class="terminal-header">
-                    <span>Terminal</span>
-                    <button class="btn" onclick="clearOutput()">Clear</button>
+                <div class="avatar">
+                    P
                 </div>
 
-                <div id="output">PPai Terminal
-Chưa chạy chương trình.</div>
+                <div class="account-text">
+                    <div class="account-name">
+                        PPai
+                    </div>
+
+                    <div class="account-sub">
+                        Python AI
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </aside>
+
+    <!-- MAIN -->
+
+    <main class="main">
+
+        <header class="topbar">
+
+            <button
+                class="menu-button"
+                onclick="toggleSidebar()"
+                title="Mở/đóng thanh bên"
+            >
+                ☰
+            </button>
+
+            <div class="mobile-title">
+                PPai
+            </div>
+
+        </header>
+
+        <!-- CHAT -->
+
+        <section class="chat" id="chat">
+
+            <div class="chat-inner" id="chatInner">
+
+                <!-- WELCOME -->
+
+                <div class="welcome" id="welcome">
+
+                    <div class="welcome-logo">
+                        P
+                    </div>
+
+                    <h1>
+                        PPai
+                    </h1>
+
+                    <p>
+                        AI lập trình Python của bạn
+                    </p>
+
+                    <div class="suggestions">
+
+                        <button
+                            class="suggestion"
+                            onclick="useSuggestion('Viết cho tôi một chương trình Python tính toán cơ bản')"
+                        >
+                            <div class="suggestion-title">
+                                Viết code Python
+                            </div>
+
+                            <div class="suggestion-text">
+                                Tạo chương trình từ mô tả của tôi
+                            </div>
+                        </button>
+
+                        <button
+                            class="suggestion"
+                            onclick="useSuggestion('Giải thích code Python này cho tôi')"
+                        >
+                            <div class="suggestion-title">
+                                Giải thích code
+                            </div>
+
+                            <div class="suggestion-text">
+                                Hiểu code Python dễ hơn
+                            </div>
+                        </button>
+
+                        <button
+                            class="suggestion"
+                            onclick="useSuggestion('Sửa lỗi trong code Python của tôi')"
+                        >
+                            <div class="suggestion-title">
+                                Sửa lỗi
+                            </div>
+
+                            <div class="suggestion-text">
+                                Tìm và sửa lỗi trong code
+                            </div>
+                        </button>
+
+                        <button
+                            class="suggestion"
+                            onclick="useSuggestion('Tạo cho tôi một game Python đơn giản')"
+                        >
+                            <div class="suggestion-title">
+                                Tạo project
+                            </div>
+
+                            <div class="suggestion-text">
+                                Bắt đầu một chương trình mới
+                            </div>
+                        </button>
+
+                    </div>
+
+                </div>
 
             </div>
 
         </section>
 
-        <!-- AI -->
-        <aside class="ai-panel">
+        <!-- INPUT -->
 
-            <div class="ai-header">
-                PPai AI
-            </div>
+        <div class="input-area">
 
-            <div class="chat" id="chat">
+            <div class="input-container">
 
-                <div class="message ai">
-                    Xin chào. Tôi là PPai AI.<br><br>
-                    Tôi có thể giúp viết, giải thích và sửa code Python.
+                <div class="input-box">
+
+                    <button
+                        class="tool-button"
+                        onclick="insertCodeTemplate()"
+                        title="Thêm code"
+                    >
+                        +
+                    </button>
+
+                    <textarea
+                        id="messageInput"
+                        rows="1"
+                        placeholder="Nhắn tin với PPai..."
+                    ></textarea>
+
+                    <div class="input-tools">
+
+                        <button
+                            class="tool-button"
+                            onclick="runCurrentCode()"
+                            title="Chạy Python"
+                        >
+                            ▶
+                        </button>
+
+                        <button
+                            class="send-button"
+                            id="sendButton"
+                            onclick="sendMessage()"
+                            title="Gửi"
+                        >
+                            ↑
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <div class="run-panel" id="runPanel">
+
+                    <div class="run-header">
+
+                        <span>
+                            Python Terminal
+                        </span>
+
+                        <button
+                            class="code-button"
+                            onclick="closeRunPanel()"
+                        >
+                            Đóng
+                        </button>
+
+                    </div>
+
+                    <div
+                        class="run-output"
+                        id="runOutput"
+                    >
+                        Chưa chạy code.
+                    </div>
+
+                </div>
+
+                <div class="disclaimer">
+                    PPai có thể mắc lỗi. Hãy kiểm tra code trước khi chạy.
                 </div>
 
             </div>
 
-            <div class="ai-input">
-
-                <textarea
-                    id="aiInput"
-                    placeholder="Hỏi PPai AI..."
-                    onkeydown="aiKeydown(event)"
-                ></textarea>
-
-                <button class="btn ai-btn" onclick="sendAI()">
-                    Gửi
-                </button>
-
-            </div>
-
-        </aside>
+        </div>
 
     </main>
 
 </div>
 
 <script>
-    const code = document.getElementById("code");
-    const output = document.getElementById("output");
+    const sidebar = document.getElementById("sidebar");
     const chat = document.getElementById("chat");
-    const aiInput = document.getElementById("aiInput");
+    const chatInner = document.getElementById("chatInner");
+    const welcome = document.getElementById("welcome");
+    const messageInput = document.getElementById("messageInput");
+    const sendButton = document.getElementById("sendButton");
+    const history = document.getElementById("history");
+    const runPanel = document.getElementById("runPanel");
+    const runOutput = document.getElementById("runOutput");
 
-    /* TAB trong editor */
-    code.addEventListener("keydown", function(event) {
-        if (event.key === "Tab") {
-            event.preventDefault();
+    let currentCode = "";
 
-            const start = code.selectionStart;
-            const end = code.selectionEnd;
+    /* SIDEBAR */
 
-            code.value =
-                code.value.substring(0, start) +
-                "    " +
-                code.value.substring(end);
-
-            code.selectionStart = code.selectionEnd = start + 4;
-        }
-
-        /* Ctrl + Enter = Run */
-        if (event.ctrlKey && event.key === "Enter") {
-            event.preventDefault();
-            runCode();
-        }
-    });
-
-    /* Chạy Python */
-    async function runCode() {
-        const source = code.value;
-
-        output.textContent = "PPai > Đang chạy...\n";
-
-        try {
-            const response = await fetch("/run", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    code: source
-                })
-            });
-
-            const data = await response.json();
-
-            if (data.output !== undefined) {
-                output.textContent = data.output;
-            } else {
-                output.textContent = data.error || "Không có kết quả.";
-            }
-
-        } catch (error) {
-            output.textContent =
-                "Không thể kết nối tới server.py\n\n" +
-                error;
-        }
+    function toggleSidebar() {
+        sidebar.classList.toggle("hidden");
     }
 
-    /* Xóa terminal */
-    function clearOutput() {
-        output.textContent = "";
+    /* NEW CHAT */
+
+    function newChat() {
+        chatInner.innerHTML = "";
+
+        const newWelcome = document.createElement("div");
+
+        newWelcome.className = "welcome";
+
+        newWelcome.innerHTML = `
+            <div class="welcome-logo">P</div>
+
+            <h1>PPai</h1>
+
+            <p>AI lập trình Python của bạn</p>
+
+            <div class="suggestions">
+
+                <button class="suggestion"
+                    onclick="useSuggestion('Viết cho tôi một chương trình Python tính toán cơ bản')">
+                    <div class="suggestion-title">
+                        Viết code Python
+                    </div>
+                    <div class="suggestion-text">
+                        Tạo chương trình từ mô tả của tôi
+                    </div>
+                </button>
+
+                <button class="suggestion"
+                    onclick="useSuggestion('Giải thích code Python này cho tôi')">
+                    <div class="suggestion-title">
+                        Giải thích code
+                    </div>
+                    <div class="suggestion-text">
+                        Hiểu code Python dễ hơn
+                    </div>
+                </button>
+
+                <button class="suggestion"
+                    onclick="useSuggestion('Sửa lỗi trong code Python của tôi')">
+                    <div class="suggestion-title">
+                        Sửa lỗi
+                    </div>
+                    <div class="suggestion-text">
+                        Tìm và sửa lỗi trong code
+                    </div>
+                </button>
+
+                <button class="suggestion"
+                    onclick="useSuggestion('Tạo cho tôi một game Python đơn giản')">
+                    <div class="suggestion-title">
+                        Tạo project
+                    </div>
+                    <div class="suggestion-text">
+                        Bắt đầu một chương trình mới
+                    </div>
+                </button>
+
+            </div>
+        `;
+
+        chatInner.appendChild(newWelcome);
+
+        currentCode = "";
+
+        addHistoryItem("Cuộc trò chuyện mới");
+
+        messageInput.value = "";
+        autoResize();
+
+        chat.scrollTop = 0;
     }
 
-    /* Focus AI */
-    function focusAI() {
-        aiInput.focus();
+    function addHistoryItem(title) {
+        const item = document.createElement("button");
+
+        item.className = "history-item";
+
+        item.innerHTML = `
+            <span>💬</span>
+            <span>${escapeHTML(title)}</span>
+        `;
+
+        history.prepend(item);
     }
 
-    /* Enter gửi AI, Shift+Enter xuống dòng */
-    function aiKeydown(event) {
-        if (event.key === "Enter" && !event.shiftKey) {
-            event.preventDefault();
-            sendAI();
-        }
+    /* SUGGESTION */
+
+    function useSuggestion(text) {
+        messageInput.value = text;
+        autoResize();
+        updateSendButton();
+        sendMessage();
     }
 
-    /* Gửi câu hỏi cho AI */
-    async function sendAI() {
-        const text = aiInput.value.trim();
+    /* SEND */
+
+    async function sendMessage() {
+
+        const text = messageInput.value.trim();
 
         if (!text) {
             return;
         }
 
-        addMessage(text, "user");
+        if (welcome) {
+            welcome.remove();
+        }
 
-        aiInput.value = "";
+        addMessage("user", text);
 
-        addMessage("Đang suy nghĩ...", "ai");
+        messageInput.value = "";
+        autoResize();
+        updateSendButton();
+
+        const thinking = addMessage(
+            "ai",
+            "Đang suy nghĩ..."
+        );
 
         try {
+
             const response = await fetch("/ai", {
                 method: "POST",
                 headers: {
@@ -478,42 +1022,349 @@ Chưa chạy chương trình.</div>
                 },
                 body: JSON.stringify({
                     message: text,
-                    code: code.value
+                    code: currentCode
                 })
             });
 
             const data = await response.json();
 
-            const messages = document.querySelectorAll(".message.ai");
-            const last = messages[messages.length - 1];
+            if (data.response) {
 
-            if (last) {
-                last.textContent =
-                    data.response || data.error || "AI không trả lời.";
+                thinking.querySelector(
+                    ".message-content"
+                ).innerHTML =
+                    formatAIResponse(data.response);
+
+            } else {
+
+                thinking.querySelector(
+                    ".message-content"
+                ).textContent =
+                    data.error || "PPai không trả lời được.";
             }
 
         } catch (error) {
-            const messages = document.querySelectorAll(".message.ai");
-            const last = messages[messages.length - 1];
 
-            if (last) {
-                last.textContent =
-                    "Không thể kết nối tới PPai AI.";
-            }
+            thinking.querySelector(
+                ".message-content"
+            ).innerHTML = `
+                <p>Không thể kết nối tới <b>server.py</b>.</p>
+                <p style="color:#999">
+                    Hãy kiểm tra server có đang chạy không.
+                </p>
+            `;
         }
 
         chat.scrollTop = chat.scrollHeight;
     }
 
-    function addMessage(text, type) {
+    /* MESSAGE */
+
+    function addMessage(type, text) {
+
         const message = document.createElement("div");
 
         message.className = "message " + type;
-        message.textContent = text;
 
-        chat.appendChild(message);
+        const avatar =
+            type === "user"
+                ? "U"
+                : "P";
+
+        message.innerHTML = `
+            <div class="message-avatar">
+                ${avatar}
+            </div>
+
+            <div class="message-content">
+                ${type === "user"
+                    ? escapeHTML(text).replace(/\n/g, "<br>")
+                    : escapeHTML(text)
+                }
+            </div>
+        `;
+
+        chatInner.appendChild(message);
+
+        chat.scrollTop = chat.scrollHeight;
+
+        return message;
+    }
+
+    /* FORMAT AI */
+
+    function formatAIResponse(text) {
+
+        let escaped = escapeHTML(text);
+
+        /*
+         * ```python
+         * code
+         * ```
+         */
+
+        escaped = escaped.replace(
+            /```(?:python|py)?\s*([\s\S]*?)```/gi,
+            function(_, code) {
+
+                const cleanCode = code.trim();
+
+                return `
+                    <div class="code-wrapper">
+
+                        <div class="code-header">
+
+                            <span>python</span>
+
+                            <div class="code-actions">
+
+                                <button
+                                    class="code-button"
+                                    onclick="copyCode(this)"
+                                >
+                                    Copy
+                                </button>
+
+                                <button
+                                    class="code-button"
+                                    onclick="runCodeBlock(this)"
+                                >
+                                    ▶ Chạy
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                        <pre>${cleanCode}</pre>
+
+                    </div>
+                `;
+            }
+        );
+
+        escaped = escaped.replace(
+            /\n\n/g,
+            "<br><br>"
+        );
+
+        escaped = escaped.replace(
+            /\n/g,
+            "<br>"
+        );
+
+        return escaped;
+    }
+
+    /* COPY CODE */
+
+    async function copyCode(button) {
+
+        const wrapper =
+            button.closest(".code-wrapper");
+
+        const code =
+            wrapper.querySelector("pre").textContent;
+
+        try {
+
+            await navigator.clipboard.writeText(code);
+
+            const oldText = button.textContent;
+
+            button.textContent = "Đã copy";
+
+            setTimeout(() => {
+                button.textContent = oldText;
+            }, 1500);
+
+        } catch {
+            button.textContent = "Lỗi";
+        }
+    }
+
+    /* RUN CODE BLOCK */
+
+    async function runCodeBlock(button) {
+
+        const wrapper =
+            button.closest(".code-wrapper");
+
+        const code =
+            wrapper.querySelector("pre").textContent;
+
+        currentCode = code;
+
+        await runPython(code);
+    }
+
+    /* RUN CURRENT */
+
+    async function runCurrentCode() {
+
+        if (!currentCode.trim()) {
+
+            runPanel.classList.add("show");
+
+            runOutput.textContent =
+                "Chưa có code Python.\n\n" +
+                "Hãy yêu cầu PPai viết code trước.";
+
+            return;
+        }
+
+        await runPython(currentCode);
+    }
+
+    /* RUN PYTHON */
+
+    async function runPython(code) {
+
+        runPanel.classList.add("show");
+
+        runOutput.textContent =
+            "PPai > Đang chạy Python...\n";
+
+        try {
+
+            const response = await fetch("/run", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    code: code
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.output !== undefined) {
+
+                runOutput.textContent =
+                    data.output || "(Không có output)";
+
+            } else {
+
+                runOutput.textContent =
+                    data.error || "Không có kết quả.";
+            }
+
+        } catch (error) {
+
+            runOutput.textContent =
+                "Không thể kết nối server.py.\n\n" +
+                error;
+        }
+
         chat.scrollTop = chat.scrollHeight;
     }
+
+    /* CLOSE TERMINAL */
+
+    function closeRunPanel() {
+        runPanel.classList.remove("show");
+    }
+
+    /* CODE TEMPLATE */
+
+    function insertCodeTemplate() {
+
+        const template =
+`# Code Python của bạn
+
+print("Hello from PPai!")
+`;
+
+        currentCode = template;
+
+        messageInput.value =
+            "Hãy xem và giúp tôi với đoạn code Python này:\n\n" +
+            template;
+
+        autoResize();
+        updateSendButton();
+        messageInput.focus();
+    }
+
+    /* INPUT */
+
+    messageInput.addEventListener(
+        "input",
+        function() {
+            autoResize();
+            updateSendButton();
+        }
+    );
+
+    messageInput.addEventListener(
+        "keydown",
+        function(event) {
+
+            if (
+                event.key === "Enter" &&
+                !event.shiftKey
+            ) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+    );
+
+    function autoResize() {
+
+        messageInput.style.height = "auto";
+
+        messageInput.style.height =
+            Math.min(
+                messageInput.scrollHeight,
+                180
+            ) + "px";
+    }
+
+    function updateSendButton() {
+
+        if (messageInput.value.trim()) {
+            sendButton.classList.add("active");
+        } else {
+            sendButton.classList.remove("active");
+        }
+    }
+
+    /* ESCAPE HTML */
+
+    function escapeHTML(value) {
+
+        return String(value)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    /* KEYBOARD */
+
+    document.addEventListener(
+        "keydown",
+        function(event) {
+
+            if (
+                event.ctrlKey &&
+                event.key.toLowerCase() === "k"
+            ) {
+                event.preventDefault();
+
+                messageInput.focus();
+            }
+
+            if (event.key === "Escape") {
+                closeRunPanel();
+            }
+        }
+    );
+
+    updateSendButton();
 </script>
 
 </body>
